@@ -56,3 +56,11 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## プロジェクト作成後
+- アップデートを実施して既知の脆弱性は解消しておく
+```
+./vendor/bin/sail up -d
+./vendor/bin/sail composer update
+./vendor/bin/sail composer audit
+```
