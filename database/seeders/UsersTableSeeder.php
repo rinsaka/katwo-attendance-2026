@@ -20,6 +20,7 @@ class UsersTableSeeder extends Seeder
         User::create([
             'name' => 'A. Sample',
             'email' => 'a@sample.com',
+            'login_id' => 'user_a',
             'password' => bcrypt('abc'),
             'created_at' => '2026-11-21 00:01:01',
             'updated_at' => '2026-11-21 00:01:01'
@@ -27,6 +28,7 @@ class UsersTableSeeder extends Seeder
         User::create([
             'name' => 'B. Sample',
             'email' => 'b@sample.com',
+            'login_id' => 'user_b',
             'password' => bcrypt('abc'),
             'created_at' => '2026-11-21 00:02:01',
             'updated_at' => '2026-11-21 00:02:01'
@@ -34,6 +36,7 @@ class UsersTableSeeder extends Seeder
         User::create([
             'name' => 'C. Sample',
             'email' => 'c@sample.com',
+            'login_id' => 'user_c',
             'password' => bcrypt('abc'),
             'created_at' => '2026-11-21 00:03:01',
             'updated_at' => '2026-11-21 00:03:01'
