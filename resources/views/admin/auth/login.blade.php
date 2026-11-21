@@ -1,8 +1,8 @@
-<x-guest-layout>
+<x-guestadmin-layout>
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form method="POST" action="{{ route('login') }}">
+    <form method="POST" action="{{ route('admin.login') }}">
         @csrf
 
         <!-- Login ID -->
@@ -40,8 +40,8 @@
             @endif
 
             <x-primary-button class="ms-3">
-                {{ __('Log in') }}
+                {{ __('Admin Log in') }}
             </x-primary-button>
         </div>
     </form>
-</x-guest-layout>
+</x-guestadmin-layout>
