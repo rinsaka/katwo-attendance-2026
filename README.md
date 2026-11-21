@@ -70,3 +70,8 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 ./vendor/bin/sail artisan migrate:rollback; ./vendor/bin/sail artisan migr
 ate; ./vendor/bin/sail artisan db:seed
 ```
+
+## To-Do
+- User Register を無効化する
+- User のメールアドレス変更・パスワード変更・アカウントの削除などを無効化する
+- .env の SESSION_LIFETIME を1ヶ月程度に変更する
