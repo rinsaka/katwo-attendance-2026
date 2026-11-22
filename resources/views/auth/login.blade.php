@@ -1,47 +1,60 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+@extends('layouts.app-2027')
 
-    <form method="POST" action="{{ route('login') }}">
-        @csrf
+@section('content')
 
-        <!-- Login ID -->
-        <div>
-            <x-input-label for="login_id" :value="__('Login ID')" />
-            <x-text-input id="login_id" class="block mt-1 w-full" type="text" name="login_id" :value="old('login_id')" required autofocus autocomplete="login_id" />
-            <x-input-error :messages="$errors->get('login_id')" class="mt-2" />
+<main class="container-md">
+@include('layouts.flash')
+
+
+<div class="card my-3 border-0 shadow-lg">
+    <div class="card-header h5 mb-0">
+        団員ログイン
+    </div>
+    <div class="card-body">
+
+        <form class="form-horizontal" method="POST" action="{{ route('login') }}">
+            {{ csrf_field() }}
+
+            <!-- Login ID -->
+            <div class="mb-4 form-group{{ $errors->has('login_id') ? ' has-error' : '' }}">
+                <label for="login_id" class="form-label fw-semibold">Login ID</label>
+                <input id="login_id" name="login_id" type="login_id"
+                    class="form-control"
+                    required
+                    value="{{ old('login_id') }}" autofocus
+                />
+                @if ($errors->has('login_id'))
+                    <span class="help-block">
+                        <strong>{{ $errors->first('login_id') }}</strong>
+                    </span>
+                @endif
+            </div>
+
+            <!-- Password -->
+            <div class="mb-4 form-group{{ $errors->has('password') ? ' has-error' : '' }}">
+                <label for="password" class="form-label fw-semibold">Password</label>
+
+                <input id="password" name="password" type="password"
+                    class="form-control"
+                    required />
+                @if ($errors->has('password'))
+                    <span class="help-block">
+                        <strong>{{ $errors->first('password') }}</strong>
+                    </span>
+                @endif
+            </div>
+
+            <!-- 送信 -->
+            <div class="d-grid d-lg-flex justify-content-sm-end gap-2 mt-4">
+            <button type="submit" class="btn btn-primary btn-lg">
+                Login
+            </button>
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+        </form>
+    </div>
+</div>
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+</main>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
-    </form>
-</x-guest-layout>
+@endsection

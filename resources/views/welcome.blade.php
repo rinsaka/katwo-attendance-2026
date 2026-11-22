@@ -153,7 +153,7 @@
 
                 @if (Auth::guard('web')->user())
                     <div class="links my-5 text-center">
-                        <a href="{{ url('/home') }}">団員専用のHomeへ</a>
+                        <a href="{{ url('/dashboard') }}">団員専用のDashboardへ</a>
                     </div>
                     <div class="links my-5 text-center">
                         <a href="{{ route('logout') }}"
@@ -167,7 +167,7 @@
                 </div>
             @elseif (Auth::guard('admin')->user())
                 <div class="links my-5 text-center">
-                    <a href="{{ url('/admin/dashboard') }}">管理者のホームへ</a>
+                    <a href="{{ url('/admin/dashboard') }}">管理者のDashboradへ</a>
                 </div>
                 <div class="links my-5 text-center">
                     <a href="{{ route('admin.logout') }}"
