@@ -21,19 +21,12 @@ Route::post('/admin/logout', [LoginController::class, 'destroy'])
 // Admin ログイン後のみアクセス可
 Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
-
-    // Route::get('activity/create', 'Admin\HomeController@create');
     Route::get('/activity/create', [DashboardController::class, 'create'])->name('admin.act_create');
-
     Route::get('/activity/{aid}', [DashboardController::class, 'edit'])->name('admin.edit');
-
     Route::patch('/activity', [DashboardController::class, 'update'])->name('admin_act_update');
-
-    // Route::post('activity', 'Admin\HomeController@store')->name('admin_act_store');
     Route::post('/activity', [DashboardController::class, 'store'])->name('admin.act_store');
 
 
-    // Route::post('logout', 'Admin\LoginController@logout')->name('admin.logout');
     // Route::delete('activity/{id}', 'Admin\HomeController@destory');
     // Route::get('place', 'Admin\HomeController@place')->name('admin.place');
     // Route::get('place/create', 'Admin\HomeController@place_create');
