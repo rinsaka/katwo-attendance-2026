@@ -167,12 +167,12 @@
                 </div>
             @elseif (Auth::guard('admin')->user())
                 <div class="links my-5 text-center">
-                    <a href="{{ url('/admin/home') }}">管理者のホームへ</a>
+                    <a href="{{ url('/admin/dashboard') }}">管理者のホームへ</a>
                 </div>
                 <div class="links my-5 text-center">
                     <a href="{{ route('admin.logout') }}"
                     onclick="event.preventDefault();
-                                    document.getElementById('admin-logout-form').submit();">
+                    document.getElementById('admin-logout-form').submit();">
                     団員モードで利用するには一旦ログアウトしてください
                 </a>
                 <form id="admin-logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">
