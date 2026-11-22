@@ -13,7 +13,22 @@ return new class extends Migration
     {
         Schema::create('activities', function (Blueprint $table) {
             $table->id();
+            $table->date('act_at');
+            $table->integer('place_id')->unsigned()->nullable();
+            $table->integer('time_id')->unsigned()->nullable();
+            $table->string('note')->nullable();
+            $table->boolean('meeting')->nullable()->default(NULL);
             $table->timestamps();
+
+            $table->foreign('place_id')
+                    ->references('id')
+                    ->on('places')
+                    ->onDelete('cascade');
+
+            $table->foreign('time_id')
+                    ->references('id')
+                    ->on('times')
+                    ->onDelete('cascade');
         });
     }
 
