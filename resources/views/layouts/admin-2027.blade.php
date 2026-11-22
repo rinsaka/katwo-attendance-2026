@@ -137,9 +137,9 @@
     </div>
 
     <div class="">
-        {{-- <a href="{{ action('Admin\HomeController@create') }}" class="link-body-emphasis link-underline link-underline-opacity-25 link-underline-opacity-100-hove"> --}}
+        <a href="{{ route('admin.act_create') }}" class="link-body-emphasis link-underline link-underline-opacity-25 link-underline-opacity-100-hove">
             活動予定を新規登録
-        {{-- </a> --}}
+        </a>
     </div>
 
     <div class="text-end">

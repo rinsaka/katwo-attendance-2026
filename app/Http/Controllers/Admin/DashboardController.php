@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Activity;
 use App\Models\Time;
 use App\Models\Place;
+use App\Models\Attendance;
 
 class DashboardController extends Controller
 {
@@ -88,5 +89,86 @@ class DashboardController extends Controller
 
         return redirect('/admin/dashboard/')
             ->with('success', $activity->act_at . "の活動予定を修正しました");
+    }
+
+    public function create()
+    {
+        // dd("create");
+        $times = Time::orderBy('jikan')->get();
+        $places = Place::orderBy('place')->get();
+        return view('admin.create')
+                ->with('times', $times)
+                ->with('places', $places);
+    }
+
+    public function store(Request $request)
+    {
+        // dd("store", $request);
+
+        $validated = $request->validate([
+            'act_at' => ['required', 'date'],
+            'note' => ['max:140'],
+        ]);
+
+        if ($request->meeting == "1") {
+            if ($request->note =="") {
+                return redirect('/admin/activity/create')->with('error', "「活動形態」を指定した場合は，「内容」に会議名などを指定してください");
+            }
+        }
+
+        $act_at = date('Y-m-d', strtotime($request->act_at));
+
+        $activity = new Activity();
+        $activity->act_at = $act_at;
+        if ($request->time == "0") {
+            $activity->time_id = null;
+        } else {
+            $activity->time_id = $request->time;
+        }
+        if ($request->place == "0") {
+            $activity->place_id = null;
+        } else {
+            $activity->place_id = $request->place;
+        }
+        if ($request->meeting == "1") {
+            $activity->meeting = true;
+        }
+        $activity->note = $request->note;
+        $activity->save();
+
+        // すでに同じ月の別の予定に出欠が登録されていれば，その人を「未定」として追加する．
+        // 同じ月の活動を取得する
+        $thismonth_head = date('Y-m-01',strtotime($act_at));
+        $thismonth_tail = date('Y-m-t',strtotime($act_at));
+
+        $acts = Activity::where('act_at', '>=', $thismonth_head)
+                                ->where('act_at', '<=', $thismonth_tail)
+                                ->where('id', '<>', $activity->id)
+                                ->get();
+        // dd($acts);
+        foreach ($acts as $act) {
+            $attendances = Attendance::where('activity_id', '=', $act->id)->get();
+
+            foreach ($attendances as $attendance) {
+                // 登録済みかどうか
+                $atten_exist = Attendance::where('activity_id', '=', $activity->id)
+                                            ->where('name', '=', $attendance->name)
+                                            ->first();
+                if (!$atten_exist) { // まだ登録されていない
+                    $new_atten = new Attendance();
+                    $new_atten->activity_id = $activity->id;
+                    $new_atten->part_id = $attendance->part_id;
+                    $new_atten->name = $attendance->name;
+                    $new_atten->attendance = 0;
+                    $new_atten->comment = '※活動予定の追加により，この情報が自動的に生成されました．';
+                    $new_atten->save();
+                }
+
+            }
+
+        }
+
+        return redirect('/admin/dashboard/')
+            ->with('success', $activity->act_at . "活動予定を新規登録しました");
     }
 }
