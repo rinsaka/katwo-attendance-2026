@@ -168,4 +168,21 @@ class DashboardController extends Controller
         return redirect('/admin/dashboard/')
             ->with('success', $activity->act_at . "活動予定を新規登録しました");
     }
+
+    public function destory(Request $request, $id)
+    {
+        // dd("destory", $request, $id);
+        if($request->confirmation != 'yakuin') {
+            return redirect('/admin/activity/'.$id)->with('error', "確認用文字列を入力してください");
+        }
+        $activity = Activity::where('id', '=', $id)->first();
+        if (!$activity) {
+            return redirect('/admin/dashboard')->with('error', "そのような活動予定がありません");
+        }
+        $activity->delete();  // cascade にしているので関連した attendances も消える
+
+        return redirect('/admin/dashboard')
+                ->with('success', $activity->act_at . " の活動予定を削除しました");
+
+    }
 }

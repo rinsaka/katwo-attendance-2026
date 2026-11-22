@@ -118,8 +118,8 @@
             <div class="card-header text-bg-warning h5 mb-0">
                 活動予定の削除
             </div>
-            {{-- <div class="card-body text-bg-warning">
-                <form action="{{ url('/admin/activity', $activity->id) }}" method="post">
+            <div class="card-body text-bg-warning">
+                <form action="{{ route('admin.act_destory', [$activity->id]) }}" method="post">
                     {{ csrf_field() }}
                     {{ method_field('DELETE') }}
                     <p class="text-bg-warning">
@@ -139,7 +139,7 @@
                     </div>
                     <p>&nbsp;</p>
                 </form>
-            </div> --}}
+            </div>
         </div>
         <!-- テキストリンク（中央寄せ） -->
         <p class="text-center mt-2 mb-0">
