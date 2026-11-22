@@ -26,7 +26,6 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::patch('/activity', [DashboardController::class, 'update'])->name('admin_act_update');
     Route::post('/activity', [DashboardController::class, 'store'])->name('admin.act_store');
 
-
     // Route::delete('activity/{id}', 'Admin\HomeController@destory');
     // Route::get('place', 'Admin\HomeController@place')->name('admin.place');
     // Route::get('place/create', 'Admin\HomeController@place_create');
