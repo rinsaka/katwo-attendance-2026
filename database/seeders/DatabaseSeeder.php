@@ -28,5 +28,6 @@ class DatabaseSeeder extends Seeder
         $this->call(TimesTableSeeder::class);
         $this->call(PartsTableSeeder::class);
         $this->call(ActivitiesTableSeeder::class);
+        $this->call(AttendancesTableSeeder::class);
     }
 }
