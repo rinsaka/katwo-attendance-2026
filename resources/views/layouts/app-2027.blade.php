@@ -117,9 +117,9 @@
             </p>
         @endif
         <div class="text-end">
-            <a href="{{ action('HomeController@mail_footer') }}" class="text-bg-secondary">
+            {{-- <a href="{{ action('HomeController@mail_footer') }}" class="text-bg-secondary"> --}}
                 メールフッタ
-            </a>
+            {{-- </a> --}}
         </div>
     @endif
     <div>
@@ -128,7 +128,7 @@
         </a>
     </div>
     <div class="">
-        This system is developed with <a href="https://laravel.com/" target="_blank" class="text-bg-secondary">Laravel</a>, <a href="https://lolipop.jp/" target="_blank" class="text-bg-secondary">LOLIPOP!</a> and <a href="https://github.com/rinsaka/katwo-attendance" target="_blank" class="text-bg-secondary">GitHub</a>.
+        This system is developed with <a href="https://laravel.com/" target="_blank" class="text-bg-secondary">Laravel</a>, <a href="https://lolipop.jp/" target="_blank" class="text-bg-secondary">LOLIPOP!</a> and <a href="https://github.com/rinsaka/katwo-attendance-2026" target="_blank" class="text-bg-secondary">GitHub</a>.
     </div>
     <div class="">
         <a href="https://rinsaka.com/rinsaka/" class="text-bg-secondary">
