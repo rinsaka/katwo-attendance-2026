@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('times', function (Blueprint $table) {
             $table->id();
+            $table->string('jikan');
+            $table->boolean('default_jikan');
             $table->timestamps();
         });
     }
