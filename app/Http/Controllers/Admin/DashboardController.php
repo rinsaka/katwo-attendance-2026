@@ -93,7 +93,6 @@ class DashboardController extends Controller
 
     public function create()
     {
-        // dd("create");
         $times = Time::orderBy('jikan')->get();
         $places = Place::orderBy('place')->get();
         return view('admin.create')
@@ -103,8 +102,6 @@ class DashboardController extends Controller
 
     public function store(Request $request)
     {
-        // dd("store", $request);
-
         $validated = $request->validate([
             'act_at' => ['required', 'date'],
             'note' => ['max:140'],
