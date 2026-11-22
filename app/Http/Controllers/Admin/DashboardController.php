@@ -185,4 +185,45 @@ class DashboardController extends Controller
                 ->with('success', $activity->act_at . " の活動予定を削除しました");
 
     }
+
+    public function passwd()
+    {
+        $admin = \Auth::user();
+        return view('admin.passwd')
+                ->with('id', $admin->id);
+    }
+
+    public function passwd_update(Request $request)
+    {
+        $admin = \Auth::user();
+        // 現在のパスワードを確認
+        if (!password_verify($request->current_password, $admin->password)) {
+            return redirect('/admin/password')
+                ->with('error', 'パスワードが違います');
+        }
+        // ここはありえないはず
+        if ($request->id != $admin->id) {
+            return redirect('/admin/password')
+                ->with('error', 'IDが不正です');
+        }
+
+        // Validation（6文字以上あるかなどのチェック）
+        $validated = $request->validate([
+            'new_password' => ['required', 'string', 'min:6'],
+        ]);
+
+
+        // Validation（2つが一致しているかのチェック）
+        if ($request->new_password != $request->new_password_confirm) {
+            return redirect('/admin/password')
+                ->with('error', '新しいパスワード（と確認用）が一致しません');
+        }
+
+        // パスワードを保存
+        $admin->password = bcrypt($request->new_password);
+        $admin->save();
+        return redirect('/admin/dashboard')
+                ->with('success', 'パスワードを変更しました');
+    }
+
 }

@@ -104,9 +104,9 @@
                                 {{-- </a> --}}
                             </li>
                             <li>
-                                {{-- <a href="{{ action('Admin\HomeController@passwd') }}" class="dropdown-item"> --}}
+                                <a href="{{ route('admin.passwd') }}" class="dropdown-item">
                                     管理者パスワードの変更
-                                {{-- </a> --}}
+                                </a>
                             </li>
                             <li>
                                 <a class="dropdown-item" href="{{ route('admin.logout') }}"

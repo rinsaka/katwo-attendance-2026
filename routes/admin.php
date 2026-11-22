@@ -25,8 +25,6 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::get('/activity/{aid}', [DashboardController::class, 'edit'])->name('admin.edit');
     Route::patch('/activity', [DashboardController::class, 'update'])->name('admin_act_update');
     Route::post('/activity', [DashboardController::class, 'store'])->name('admin.act_store');
-
-    // Route::delete('activity/{id}', 'Admin\HomeController@destory');
     Route::delete('/activity/{id}', [DashboardController::class, 'destory'])->name('admin.act_destory');
 
 
@@ -44,8 +42,12 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     // Route::patch('time', 'Admin\HomeController@time_update')->name('admin_time_update');
     // Route::post('time', 'Admin\HomeController@time_store')->name('admin_time_store');
     // Route::delete('time/{tid}', 'Admin\HomeController@time_destroy');
-    // Route::get('password', 'Admin\HomeController@passwd');
-    // Route::patch('password', 'Admin\HomeController@passwd_update')->name('admin.passwd');
+
+
+    Route::get('/password', [DashboardController::class, 'passwd'])->name('admin.passwd');
+    Route::patch('/password', [DashboardController::class, 'passwd_update'])->name('admin.passwd_update');
+
+
     // Route::get('userpassword', 'Admin\HomeController@userpasswd');
     // Route::patch('userpassword', 'Admin\HomeController@userpasswd_update')->name('admin.userpasswd');
     // Route::get('mailinfo', 'Admin\MailinfosController@edit');
