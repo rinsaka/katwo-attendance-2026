@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('places', function (Blueprint $table) {
             $table->id();
+            $table->string('place', 100);
+            $table->boolean('default_place');
             $table->timestamps();
         });
     }
