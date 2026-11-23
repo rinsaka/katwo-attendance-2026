@@ -216,7 +216,7 @@
                                     <ul class="list-group ">
                                         @foreach ($part->attendances as $attendance)
                                             <!-- 行：左にステータス、中央にニックネーム/新規更新/メモ -->
-                                            <a href="{{ action('HomeController@edit', [$this_year, $this_month, $attendance->id]) }}" class="list-group-item list-group-item-action d-flex align-items-start gap-3 py-2">
+                                            <a href="{{ route('edit', [$this_year, $this_month, $attendance->id]) }}" class="list-group-item list-group-item-action d-flex align-items-start gap-3 py-2">
                                                 <!-- ステータス（ニックネームの直前） -->
                                                 @if ($attendance->attendance == 3)
                                                     <span class="badge rounded-pill text-bg-success mt-1">

@@ -84,7 +84,112 @@ class DashboardController extends Controller
                 ->with('this_month', $this_month);
     }
 
+    public function show($year, $month)
+    {
+        // URL の Validation
+        if ($year > 2080 || $year < 2017 || $month < 1 || $month > 12) {
+            return redirect('/home/')->with('error', "不正なURLです！");
+        } // まだ home/2018/11.2/ のような場合も動いてしまう．この後 (int) でキャストしているので問題なし．
 
+        $thismonth_head = date("Y-m-01", mktime(0,0,0,$month,1,$year));
+        $thismonth_tail = date("Y-m-t", mktime(0,0,0,$month,1,$year));
+        $this_year = $year;
+        $this_month = $month;
+
+        $year = (int) $year;
+        $month = (int) $month;
+        if($month == 1) {
+            $prev_year = $year - 1;
+            $prev_month = 12;
+            $next_year = $year;
+            $next_month = 2;
+        } elseif ($month == 12) {
+            $prev_year = $year;
+            $prev_month = 11;
+            $next_year = $year + 1;
+            $next_month = 1;
+        } else {
+            $prev_year = $year;
+            $prev_month = $month - 1;
+            $next_year = $year;
+            $next_month = $month + 1;
+        }
+        // dd($thismonth_head, $thismonth_tail, $prev_year, $prev_month, $next_year, $next_month);
+        // dd($year, $month, $thismonth_head, $thismonth_tail);
+
+        $activities = Activity::where('act_at', '>=', $thismonth_head)
+                                ->where('act_at', '<=', $thismonth_tail)
+                                ->orderBy('act_at')
+                                ->orderBy('meeting', 'DESC')
+                                ->get();
+        // 各アクティビティについていろいろと取得する
+        $activities = $this->get_Attendances_detail($activities);
+        $iter = 0;
+        foreach ($activities as $activity) {
+            $activity->class_expansion_link = "expansion_link" . $iter;
+            $activity->class_attendance = "attendance" . $iter;
+            $iter++;
+        }
+        // dd($activities);
+
+        // 改行を含む Menu をリストに変換
+        foreach ($activities as $activity) {
+            if ($activity->menu) {
+                $array = explode("\n", $activity->menu->menu); // 行に分割
+                $array = array_map('trim', $array); // 各行にtrim()をかける
+            } else {
+                $array = array();
+            }
+            $activity->menus = $array;
+
+            // 新規登録と更新情報を設定
+            if ($activity->menu) {
+                // 最終更新からの経過時間を分単位で取得する
+                $minutes_from_update = (strtotime("now") - strtotime($activity->menu->updated_at)) / 60;
+                // 「新規」と「更新」を初期化
+                $activity->menu->new = false;
+                $activity->menu->update = false;
+                // 定数で指定された時間より短ければ「新規」または「更新」を設定する
+                if ($minutes_from_update < \Config::get('const.NEW_THRESHOLD')) {
+                    if ($activity->menu->created_at == $activity->menu->updated_at) {
+                        $activity->menu->new = true;
+                    } else {
+                        $activity->menu->update = true;
+                    }
+                }
+            }
+        }
+
+        return view('dashboard')
+                ->with('activities', $activities)
+                ->with('prev_year', $prev_year)
+                ->with('prev_month', $prev_month)
+                ->with('next_year', $next_year)
+                ->with('next_month', $next_month)
+                ->with('this_year', $this_year)
+                ->with('this_month', $this_month);
+
+    }
+
+    public function create($year, $month)
+    {
+        dd("create", $year, $month);
+    }
+
+    public function store(Request $request)
+    {
+        dd("store", $request);
+    }
+
+    public function edit($year, $month, $aid)
+    {
+        dd("edit", $year, $month, $aid);
+    }
+
+    public function update(Request $request)
+    {
+        dd("update", $request);
+    }
 
     private function get_Attendances_detail($acts)
     {
@@ -204,4 +309,24 @@ class DashboardController extends Controller
         return $acts;
     }
 
+
+    public function confirm_delete(Request $request)
+    {
+        dd("confirm_delete", $request);
+    }
+
+    public function destroy(Request $request)
+    {
+        dd("destroy", $request);
+    }
+
+    public function all_act()
+    {
+        dd("all_act");
+    }
+
+    public function mail_footer()
+    {
+        dd("mail_footer");
+    }
 }
