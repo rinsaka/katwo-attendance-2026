@@ -18,7 +18,7 @@
 
             <ol class="list-group list-group-numbered mb-4">
                 @forelse ($times as $time)
-                    <a href=""
+                    <a href="{{ route('admin.time_edit', [$time->id]) }}"
                     @if ($time->default_jikan == 1)
                         class="list-group-item list-group-item-action list-group-item-primary"
                     @else
