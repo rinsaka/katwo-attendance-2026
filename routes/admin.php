@@ -35,8 +35,16 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
 
     // Route::delete('place/{pid}', 'Admin\HomeController@place_destroy');
+
     // Route::get('place/{pid}/delete', 'Admin\HomeController@place_delete');
+    Route::get('/place/{pid}/delete', [DashboardController::class, 'place_delete'])->name('admin.place_delete');
+
+
+
     // Route::patch('place', 'Admin\HomeController@place_update')->name('admin_place_update');
+    Route::patch('/place', [DashboardController::class, 'place_update'])->name('admin.place_update');
+
+
     // Route::post('place', 'Admin\HomeController@place_store')->name('admin_place_store');
     // Route::get('time', 'Admin\HomeController@time')->name('admin.time');
     // Route::get('time/create', 'Admin\HomeController@time_create');

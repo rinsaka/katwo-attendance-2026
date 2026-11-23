@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 use App\Models\Activity;
 use App\Models\Time;
@@ -283,7 +284,55 @@ class DashboardController extends Controller
 
     public function place_edit($pid)
     {
-        dd($pid);
+        $place = Place::where('id', '=', $pid)->first();
+        if(!$place) {
+            return redirect('/admin/place/')->with('error', "そのような活動施設がありません");
+        }
+        return view('admin.place.edit')
+                ->with('place', $place);
     }
 
+    public function place_update(Request $request)
+    {
+        // dd("place update", $request);
+        // $this->validate($request, [
+        //     'place' => [
+        //         'required',
+        //         'max:100',
+        //         Rule::unique('places')->ignore($request->pid),
+        //     ],
+        // ]);
+
+        $validated = $request->validate([
+            'place' => [
+                'required',
+                'max:100',
+                Rule::unique('places')->ignore($request->pid),
+            ],
+        ]);
+
+        $place = Place::where('id', '=', $request->pid)->first();
+        if (!$place) {
+            return redirect('/admin/dashboard/')->with('error', "そのような活動施設がありません");
+        }
+        $place->place = $request->place;
+        if ($place->default_place == 0 && isset($request->default_place)) {
+            // デフォルト活動場所が変更された
+            $prev_default = Place::where('default_place', '=', 1)->first();
+            if ($prev_default) {
+                $prev_default->default_place = 0;
+                $prev_default->save();
+            }
+            $place->default_place = 1;
+        }
+
+        $place->save();
+        return redirect()->route('admin.place')
+            ->with('success', "活動施設情報を更新しました");
+    }
+
+    public function place_delete($pid)
+    {
+        dd("place delete", $pid);
+    }
 }
