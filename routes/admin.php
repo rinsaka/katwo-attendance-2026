@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PlaceController;
 use App\Http\Controllers\Admin\LoginController;
 
 // // Admin 認証不要
@@ -26,13 +27,14 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::patch('/activity', [DashboardController::class, 'update'])->name('admin_act_update');
     Route::post('/activity', [DashboardController::class, 'store'])->name('admin.act_store');
     Route::delete('/activity/{id}', [DashboardController::class, 'destory'])->name('admin.act_destory');
-    Route::get('/place', [DashboardController::class, 'place'])->name('admin.place');
-    Route::get('/place/create', [DashboardController::class, 'place_create'])->name('admin.place_create');
-    Route::get('/place/{pid}', [DashboardController::class, 'place_edit'])->name('admin.place_edit');
-    Route::delete('/place/{pid}', [DashboardController::class, 'place_destroy'])->name('admin.place_destroy');
-    Route::get('/place/{pid}/delete', [DashboardController::class, 'place_delete'])->name('admin.place_delete');
-    Route::patch('/place', [DashboardController::class, 'place_update'])->name('admin.place_update');
-    Route::post('/place', [DashboardController::class, 'place_store'])->name('admin.place_store');
+
+    Route::get('/place', [PlaceController::class, 'index'])->name('admin.place');
+    Route::get('/place/create', [PlaceController::class, 'create'])->name('admin.place_create');
+    Route::get('/place/{pid}', [PlaceController::class, 'edit'])->name('admin.place_edit');
+    Route::delete('/place/{pid}', [PlaceController::class, 'destroy'])->name('admin.place_destroy');
+    Route::get('/place/{pid}/delete', [PlaceController::class, 'delete'])->name('admin.place_delete');
+    Route::patch('/place', [PlaceController::class, 'update'])->name('admin.place_update');
+    Route::post('/place', [PlaceController::class, 'store'])->name('admin.place_store');
 
 
     // Route::get('time', 'Admin\HomeController@time')->name('admin.time');
