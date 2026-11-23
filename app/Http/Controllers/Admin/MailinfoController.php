@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 
 use App\Models\Mailinfo;
 
-
 class MailinfoController extends Controller
 {
     public function edit()
@@ -27,6 +26,18 @@ class MailinfoController extends Controller
 
     public function update(Request $request)
     {
-        dd("update mailinfo", $request);
+        $validated = $request->validate([
+            'mailinfo' => ['required'],
+        ]);
+
+        $mailinfo = Mailinfo::where('id', '=', $request->id)
+                            ->where('key', '=', $request->key)
+                            ->first();
+        if (!$mailinfo) {
+            return redirect('/admin/dashboard')->with('error', '不正なパラメータです');
+        }
+        $mailinfo->mailinfo = $request->mailinfo;
+        $mailinfo->save();
+        return redirect('/admin/mailinfo')->with('success', "メールフッタを更新しました");
     }
 }
