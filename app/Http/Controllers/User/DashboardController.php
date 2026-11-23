@@ -4,11 +4,204 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+
+use App\Models\Activity;
+use App\Models\Part;
+use App\Models\Attendance;
+use App\Models\Mailinfo;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        return view('dashboard');
+        // 今月
+        $thismonth_head = date('Y-m-01',time());
+        $thismonth_tail = date('Y-m-t',time());
+        $this_year = date('Y',time());
+        $this_month = date('m',time());
+        // 先月
+        $prev_year = date('Y', strtotime('-1 month'));
+        $prev_month = date('m', strtotime('-1 month'));
+        // 来月
+        $next_year = date('Y', strtotime('+1 month'));
+        $next_month = date('m', strtotime('+1 month'));
+        // dd($thismonth_head, $thismonth_tail, $prev_year, $prev_month, $next_year, $next_month);
+
+        // Activity を取得
+        $activities = Activity::where('act_at', '>=', $thismonth_head)
+                                ->where('act_at', '<=', $thismonth_tail)
+                                ->orderBy('act_at')
+                                ->orderBy('meeting', 'DESC')
+                                ->get();
+        // 各アクティビティについていろいろと取得する
+        $activities = $this->get_Attendances_detail($activities);
+        $iter = 0;
+        foreach ($activities as $activity) {
+            $activity->class_expansion_link = "expansion_link" . $iter;
+            $activity->class_attendance = "attendance" . $iter;
+            $iter++;
+        }
+        // dd($activities, $activities[0], $activities[0]->attens, $activities[0]->attens[0]);
+
+        // 改行を含む Menu をリストに変換
+        foreach ($activities as $activity) {
+            if ($activity->menu) {
+                $array = explode("\n", $activity->menu->menu); // 行に分割
+                $array = array_map('trim', $array); // 各行にtrim()をかける
+            } else {
+                // @codeCoverageIgnoreStart
+                $array = array();
+                // @codeCoverageIgnoreEnd
+            }
+            $activity->menus = $array;
+
+            // 新規登録と更新情報を設定
+            if ($activity->menu) {
+                // 最終更新からの経過時間を分単位で取得する
+                $minutes_from_update = (strtotime("now") - strtotime($activity->menu->updated_at)) / 60;
+                // 「新規」と「更新」を初期化
+                $activity->menu->new = false;
+                $activity->menu->update = false;
+                // 定数で指定された時間より短ければ「新規」または「更新」を設定する
+                if ($minutes_from_update < \Config::get('const.NEW_THRESHOLD')) {
+                    if ($activity->menu->created_at == $activity->menu->updated_at) {
+                        $activity->menu->new = true;
+                    } else {
+                        $activity->menu->update = true;
+                    }
+                }
+            }
+        }
+
+        return view('dashboard')
+                ->with('activities', $activities)
+                ->with('prev_year', $prev_year)
+                ->with('prev_month', $prev_month)
+                ->with('next_year', $next_year)
+                ->with('next_month', $next_month)
+                ->with('this_year', $this_year)
+                ->with('this_month', $this_month);
     }
+
+
+
+    private function get_Attendances_detail($acts)
+    {
+        foreach ($acts as $act) {
+            // attendance ごとの合計を取得
+            $atten = array();
+            for ($i = 0 ; $i <= 3; $i++) {
+                $atten[]  = Attendance::where('activity_id', '=', $act->id)
+                                        ->where('attendance', '=', $i)->count();
+            }
+            // 登録者数の合計
+            $atten[] = 0;
+            for ($i = 0 ; $i <= 3; $i++) {
+                $atten[4]  += $atten[$i];
+            }
+            $act->n_atten = $atten;
+
+            // 会議対象外の数
+            $act->n_not_members = Attendance::where('activity_id', '=', $act->id)
+                                        ->where('attendance', '=', -1)->count();
+
+            // パートごと
+            foreach ($acts as $act) {
+                $parts = Part::orderBy('id')->get();
+                foreach ($parts as $part) {
+                    // 人数を集計する
+                    $part_atten = array();
+                    for ($i = 0 ; $i <= 3; $i++) {
+                        $part_atten[]  = Attendance::where('activity_id', '=', $act->id)
+                                                ->where('part_id', '=', $part->id)
+                                                ->where('attendance', '=', $i)->count();
+                    }
+                    $part->n_atten = $part_atten;
+                    // 回答のリストを取得
+                    $part->attendances = Attendance::where('activity_id', '=', $act->id)
+                                            ->where('part_id', '=', $part->id)
+                                            ->orderBy('attendance', 'DESC')
+                                            ->orderBy('updated_at')
+                                            ->get();
+                    // 新規登録と更新情報を設定
+                    foreach ($part->attendances as $attendance) {
+                        // 最終更新からの経過時間を分単位で取得する
+                        $minutes_from_update = (strtotime("now") - strtotime($attendance->updated_at)) / 60;
+                        // 「新規」と「更新」を初期化
+                        $attendance->new = false;
+                        $attendance->update = false;
+                        // 定数で指定された時間より短ければ「新規」または「更新」を設定する
+                        if ($minutes_from_update < \Config::get('const.NEW_THRESHOLD')) {
+                            if ($attendance->created_at == $attendance->updated_at) {
+                                $attendance->new = true;
+                            } else {
+                                $attendance->update = true;
+                            }
+                        }
+                    }
+
+                    // コメントをトリミング
+                    foreach ($part->attendances as $attendance) {
+                        $comment = $attendance->comment ?? '';
+                        $attendance->comment_trim = $comment;
+                        if (mb_strlen($comment) > 18) {
+                            $attendance->comment_trim = mb_substr($comment, 0, 16) . "...";
+                        }
+                    }
+                }
+                $act->parts = $parts;
+            }
+
+            // 出席形態ごと
+            foreach ($acts as $act) {
+                $atten_ids = array(3, 1, 0, -1);
+                $attens = collect();
+                // 出席形態ごとに回答のリストを取得
+                foreach ($atten_ids as $key => $atten_id) {
+                    $atten = Attendance::where('activity_id', '=', $act->id)
+                                ->where('attendance', '=', $atten_id)
+                                ->orderBy('part_id')
+                                ->orderBy('updated_at')
+                                ->get();
+                    $attens[] = $atten;
+                }
+                // 新規登録と更新情報を設定
+                foreach ($attens as $attendances) {
+                    foreach($attendances as $attendance) {
+                        // 最終更新からの経過時間を分単位で取得する
+                        $minutes_from_update = (strtotime("now") - strtotime($attendance->updated_at)) / 60;
+                        // 「新規」と「更新」を初期化
+                        $attendance->new = false;
+                        $attendance->update = false;
+                        // 定数で指定された時間より短ければ「新規」または「更新」を設定する
+                        if ($minutes_from_update < \Config::get('const.NEW_THRESHOLD')) {
+                            if ($attendance->created_at == $attendance->updated_at) {
+                                $attendance->new = true;
+                            } else {
+                                $attendance->update = true;
+                            }
+                        }
+                    }
+
+                }
+                // コメントをトリミング
+                // dd($attens);
+                foreach ($attens as $attendances) {
+                    foreach ($attendances as $attendance){
+                        $comment = $attendance->comment ?? '';
+                        $attendance->comment_trim = $comment;
+                        if (mb_strlen($comment) > 18) {
+                            $attendance->comment_trim = mb_substr($comment, 0, 16) . "...";
+                        }
+                    }
+                }
+
+                $act->attens = $attens;
+            }
+        }
+        // dd($acts);
+        return $acts;
+    }
+
 }

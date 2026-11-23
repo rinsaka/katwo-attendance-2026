@@ -20,6 +20,33 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth', 'verified')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+
+
+    // Route::post('/home/confirm_delete', 'HomeController@confirm_delete');
+    // Route::get('/home/list', 'HomeController@all_act');
+    // Route::get('/home/mail', 'HomeController@mail_footer');
+
+
+    // Route::get('/home/{year}/{month}', 'HomeController@show');
+    Route::get('/dashboard/year}/{month}', [DashboardController::class, 'show'])->name('show');
+
+    // Route::get('/home/{year}/{month}/create', 'HomeController@create');
+    Route::get('/dashboard/year}/{month}/create', [DashboardController::class, 'create'])->name('create');
+
+
+    // Route::get('/home/{year}/{month}/{aid}/edit', 'HomeController@edit');
+    Route::get('/dashboard/year}/{month}/{aid}/edit', [DashboardController::class, 'edit'])->name('edit');
+
+
+    // Route::post('/home/', 'HomeController@store')->name('store');
+    // Route::patch('/home/', 'HomeController@update')->name('update');
+    // Route::delete('/home/', 'HomeController@destroy')->name('destroy');
+    // Route::get('/menu/create', 'MenusController@create');
+    // Route::get('/menu/{id}', 'MenusController@show');
+    // Route::get('/menu/{id}/mail', 'MenusController@mail');
+    // Route::patch('/menu', 'MenusController@update')->name('menu_update');
+    // Route::post('/menu', 'MenusController@store')->name('menu_store');
 });
 
 require __DIR__.'/auth.php';
