@@ -143,9 +143,9 @@
     </div>
 
     <div class="text-end">
-        {{-- <a href="{{ action('Admin\MailinfosController@edit') }}" class="link-body-emphasis link-underline link-underline-opacity-25 link-underline-opacity-100-hove"> --}}
+        <a href="{{ route('admin.mailinfo_edit') }}" class="link-body-emphasis link-underline link-underline-opacity-25 link-underline-opacity-100-hove">
             メールフッタを編集
-        {{-- </a> --}}
+        </a>
     </div>
 
     <div class="text-end">

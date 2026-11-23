@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PlaceController;
 use App\Http\Controllers\Admin\TimeController;
 use App\Http\Controllers\Admin\PasswordController;
+use App\Http\Controllers\Admin\MailinfoController;
 use App\Http\Controllers\Admin\LoginController;
 
 // // Admin 認証不要
@@ -55,6 +56,9 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::patch('/userpassword', [PasswordController::class, 'userpasswd_update'])->name('admin.userpasswd_update');
 
 
-    // Route::get('mailinfo', 'Admin\MailinfosController@edit');
-    // Route::post('mailinfo', 'Admin\MailinfosController@update')->name('admin.mailinfo');
+    // Route::get('mailinfo', 'Admin\MailinfosController@edit')->name('admin.edit_mailinfo');
+    // Route::post('mailinfo', 'Admin\MailinfosController@update')->name('admin.update_mailinfo');
+
+    Route::get('/mailinfo', [MailinfoController::class, 'edit'])->name('admin.mailinfo_edit');
+    Route::patch('/mailinfo', [MailinfoController::class, 'update'])->name('admin.update_mailinfo');
 });
