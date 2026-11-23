@@ -28,7 +28,6 @@ Route::middleware('auth', 'verified')->group(function () {
     // Route::get('/home/mail', 'HomeController@mail_footer');
 
 
-    // Route::get('/home/{year}/{month}', 'HomeController@show');
     Route::get('/dashboard/{year}/{month}', [DashboardController::class, 'show'])->name('show');
 
     // Route::get('/home/{year}/{month}/create', 'HomeController@create');
@@ -40,6 +39,9 @@ Route::middleware('auth', 'verified')->group(function () {
 
 
     // Route::post('/home/', 'HomeController@store')->name('store');
+    Route::post('/dashboard', [DashboardController::class, 'store'])->name('store');
+
+
     // Route::patch('/home/', 'HomeController@update')->name('update');
     // Route::delete('/home/', 'HomeController@destroy')->name('destroy');
     // Route::get('/menu/create', 'MenusController@create');

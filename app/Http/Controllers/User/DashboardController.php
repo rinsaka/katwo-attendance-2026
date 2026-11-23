@@ -173,7 +173,29 @@ class DashboardController extends Controller
 
     public function create($year, $month)
     {
-        dd("create", $year, $month);
+        // dd("create", $year, $month);
+        $thismonth_head = date("Y-m-01", mktime(0,0,0,$month,1,$year));
+        $thismonth_tail = date("Y-m-t", mktime(0,0,0,$month,1,$year));
+
+        $activities = Activity::where('act_at', '>=', $thismonth_head)
+                                ->where('act_at', '<=', $thismonth_tail)
+                                ->orderBy('act_at')
+                                ->orderBy('meeting', 'DESC')
+                                ->get();
+        $n_act = count($activities);
+
+        if ($n_act == 0) {
+            return redirect('/dashboard/'.$year.'/'.$month)->with('error', "活動予定がまだ登録されていません");
+        }
+
+        $parts = Part::orderBy('id')->get();
+        // dd('create', $year, $month, $activities, $parts, $n_act);
+        return view('create')
+                ->with('activities', $activities)
+                ->with('n_act', $n_act)
+                ->with('parts', $parts)
+                ->with('year', $year)
+                ->with('month', $month);
     }
 
     public function store(Request $request)
