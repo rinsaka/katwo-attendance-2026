@@ -200,7 +200,69 @@ class DashboardController extends Controller
 
     public function store(Request $request)
     {
-        dd("store", $request);
+        // $request->name = trim(mb_convert_kana($request->name, 's', 'UTF-8')); // 全角スペースを半角スペースに置換したあと，トリム
+
+        $request->merge([
+            'name' => trim(mb_convert_kana($request->name ?? '', 's', 'UTF-8'))
+        ]);
+
+        $validated = $request->validate([
+            'part' => ['required', 'min:1'],
+            'name' => ['required', 'max:30'], // 入力が必須で，最大30文字
+        ]);
+
+        $name = $request->name;
+        $part = $request->part;
+        $n_act = $request->n_act;
+        $year = $request->year;
+        $month = $request->month;
+
+        // @codeCoverageIgnoreStart
+        if (strlen($name)==0) {
+            return redirect('/dashboard/'.$year.'/'.$month .'/create')->with('error', "名前が入力されていません");
+        }
+        // @codeCoverageIgnoreEnd
+
+        $thismonth_head = date("Y-m-01", mktime(0,0,0,$month,1,$year));
+        $thismonth_tail = date("Y-m-t", mktime(0,0,0,$month,1,$year));
+
+        $activities = Activity::where('act_at', '>=', $thismonth_head)
+                                ->where('act_at', '<=', $thismonth_tail)
+                                ->get();
+        // 名前の重複チェック
+        foreach ($activities as $activity) {
+            $act_id = $activity->id;
+            $attens = Attendance::where('activity_id', '=', $act_id)->get();
+            foreach ($attens as $atten) {
+                if ($atten->name == $name) {
+                    return redirect('/dashboard/'.$year.'/'.$month .'/create')->with('error', "登録できませんでした！同じ名前の予定が登録済みです");
+                }
+            }
+        }
+
+        // ここで validation
+        foreach ($activities as $activity) {
+            $obj_name_comment = "comment" . $activity->id;
+            $validated = $request->validate([
+                $obj_name_comment => ['max:140'],
+            ]);
+        }
+
+        foreach ($activities as $activity) {
+            $obj_name_act = "act" . $activity->id;
+            $obj_name_comment = "comment" . $activity->id;
+            // var_dump($obj_name, $request->$obj_name);
+
+            $attendance = new Attendance;
+            $attendance->name = $name;
+            $attendance->activity_id = $activity->id;
+            $attendance->attendance = $request->$obj_name_act;
+            $attendance->comment = $request->$obj_name_comment;
+            $attendance->part_id = $part;
+
+            $attendance->save();
+        }
+        return redirect('/dashboard/'.$year.'/'.$month)->with('success', $name . " さんの予定を登録しました");
     }
 
     public function edit($year, $month, $aid)
