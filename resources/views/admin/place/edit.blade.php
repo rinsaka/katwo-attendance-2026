@@ -79,7 +79,7 @@
                 </div>
                 <!-- テキストリンク（中央寄せ） -->
                 <p class="text-center mt-2 mb-0">
-                    <a href="{{ route('admin.dashboard') }}">活動予定一覧（管理者モード）に戻る</a>
+                    <a href="{{ route('admin.place') }}">活動施設一覧（管理者モード）に戻る</a>
                 </p>
 
                 <p class='mt-2 mb-0'>
