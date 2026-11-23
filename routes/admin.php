@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PlaceController;
+use App\Http\Controllers\Admin\PasswordController;
 use App\Http\Controllers\Admin\LoginController;
 
 // // Admin 認証不要
@@ -46,11 +47,11 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     // Route::delete('time/{tid}', 'Admin\HomeController@time_destroy');
 
 
-    Route::get('/password', [DashboardController::class, 'passwd'])->name('admin.passwd');
-    Route::patch('/password', [DashboardController::class, 'passwd_update'])->name('admin.passwd_update');
+    Route::get('/password', [PasswordController::class, 'passwd'])->name('admin.passwd');
+    Route::patch('/password', [PasswordController::class, 'passwd_update'])->name('admin.passwd_update');
 
-    Route::get('/userpassword', [DashboardController::class, 'userpasswd'])->name('admin.userpasswd');
-    Route::patch('/userpassword', [DashboardController::class, 'userpasswd_update'])->name('admin.userpasswd_update');
+    Route::get('/userpassword', [PasswordController::class, 'userpasswd'])->name('admin.userpasswd');
+    Route::patch('/userpassword', [PasswordController::class, 'userpasswd_update'])->name('admin.userpasswd_update');
 
 
     // Route::get('mailinfo', 'Admin\MailinfosController@edit');
