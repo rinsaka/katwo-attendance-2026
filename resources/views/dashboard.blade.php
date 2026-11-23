@@ -313,7 +313,7 @@
     </div>
 
     <div class="mb-4">
-        <a href="">練習予定の一覧を表示する</a>
+        <a href="{{ route('all_act') }}">練習予定の一覧を表示する</a>
     </div>
 </main>
 @endsection

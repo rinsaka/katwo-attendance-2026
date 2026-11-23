@@ -20,14 +20,12 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth', 'verified')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-
-
-
-    // Route::post('/dashboard/confirm_delete', 'DashboardController@confirm_delete');
     Route::post('/dashboard/confirm_delete', [DashboardController::class, 'confirm_delete'])->name('confirm_delete');
 
     // Route::get('/home/list', 'HomeController@all_act');
+    Route::get('/dashboard/list', [DashboardController::class, 'all_act'])->name('all_act');
+
+
     // Route::get('/home/mail', 'HomeController@mail_footer');
 
 
@@ -36,9 +34,6 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::get('/dashboard/{year}/{month}/{aid}/edit', [DashboardController::class, 'edit'])->name('edit');
     Route::post('/dashboard', [DashboardController::class, 'store'])->name('store');
     Route::patch('/dashboard', [DashboardController::class, 'update'])->name('update');
-
-
-    // Route::delete('/home/', 'HomeController@destroy')->name('destroy');
     Route::delete('/dashboard', [DashboardController::class, 'destroy'])->name('destroy');
 
 

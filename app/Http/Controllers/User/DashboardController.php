@@ -525,7 +525,37 @@ class DashboardController extends Controller
 
     public function all_act()
     {
-        dd("all_act");
+        // すべての Activity を取得
+        $activities = Activity::orderBy('act_at')
+                                ->orderBy('meeting', 'DESC')
+                                ->get();
+        // 月ごとにまとめる
+        $month_acts = array();
+        $m_prev = 0;
+        foreach ($activities as $activity) {
+            $y = date('Y', strtotime($activity->act_at));
+            $m = date('m', strtotime($activity->act_at));
+            $d = date('d', strtotime($activity->act_at));
+            // 次が変われば行を追加
+            if ($m_prev != $m) {
+                $month_acts[] = "【" . $y . "年" . $m . "月】";
+            }
+            $act = $y . "年" . $m . "月" . $d . "日" . parent::get_youbi($activity->act_at);
+            $act = $act . " " . $activity->time->jikan;
+            if ($activity->meeting=="1") {
+                $act = $act . " " . "【一部団員に限定した活動です】" ;
+            }
+            $month_acts[] = $act; // 追加（改行）
+            $act = "　" . $activity->place->place . " " . $activity->note;
+            $month_acts[] = $act; // 追加（改行）
+            $m_prev = $m;
+
+            // $activity->y = $y;
+            // $activity->m = $m;
+            // $activity->d = $d;
+        }
+        return view('list')
+                ->with('month_acts', $month_acts);
     }
 
     public function mail_footer()
