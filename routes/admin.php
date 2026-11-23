@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PlaceController;
+use App\Http\Controllers\Admin\TimeController;
 use App\Http\Controllers\Admin\PasswordController;
 use App\Http\Controllers\Admin\LoginController;
 
@@ -39,6 +40,9 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
 
     // Route::get('time', 'Admin\HomeController@time')->name('admin.time');
+    Route::get('/time', [TimeController::class, 'index'])->name('admin.time');
+
+
     // Route::get('time/create', 'Admin\HomeController@time_create');
     // Route::get('time/{tid}', 'Admin\HomeController@time_edit')->name('admin.time_edit');
     // Route::get('time/{tid}/delete', 'Admin\HomeController@time_delete');

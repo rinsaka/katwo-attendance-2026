@@ -155,9 +155,9 @@
     </div>
 
     <div class="text-end">
-        {{-- <a href="{{ action('Admin\HomeController@time') }}" class="link-body-emphasis link-underline link-underline-opacity-25 link-underline-opacity-100-hove"> --}}
+        <a href="{{ route('admin.time') }}" class="link-body-emphasis link-underline link-underline-opacity-25 link-underline-opacity-100-hove">
             活動時間の一覧表示
-        {{-- </a> --}}
+        </a>
     </div>
     @endif
     <div>
