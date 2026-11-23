@@ -328,7 +328,57 @@ class DashboardController extends Controller
 
     public function update(Request $request)
     {
-        dd("update", $request);
+        // dd("update", $request);
+        $part = $request->part;
+        $n_act = $request->n_act;
+        $year = $request->year;
+        $month = $request->month;
+        $aid = $request->aid;
+        $name = $request->name;
+
+        $thismonth_head = date("Y-m-01", mktime(0,0,0,$month,1,$year));
+        $thismonth_tail = date("Y-m-t", mktime(0,0,0,$month,1,$year));
+
+        $attendances = Attendance::select('attendances.*', 'activities.*', 'attendances.id as attendance_id')
+                                    ->join('activities', 'attendances.activity_id', '=', 'activities.id')
+                                    ->where('attendances.name', '=', $name)
+                                    ->where('activities.act_at', '>=', $thismonth_head)
+                                    ->where('activities.act_at', '<=', $thismonth_tail)
+                                    ->get();
+        foreach ($attendances as $attendance) {
+            $attendance->id = $attendance->attendance_id;
+        }
+
+        // ここで validation
+        foreach ($attendances as $attendance) {
+            $obj_name_comment = "comment" . $attendance->id;
+
+            $validated = $request->validate([
+                $obj_name_comment => ['max:140'],
+            ]);
+        }
+
+        // dd($request);
+
+        // $this->validate($request, [
+        //   'part' => 'required|min:1',
+        //   'name' => 'required|max:100'  // 入力が必須で，最大100文字
+        // ]);
+        //
+
+        foreach ($attendances as $attendance) {
+            $obj_name_atten = "atten" . $attendance->id;
+            $obj_name_comment = "comment" . $attendance->id;
+            // var_dump($obj_name, $request->$obj_name);
+            $atten = Attendance::where('id', '=', $attendance->id)
+                                    ->first();
+            $atten->attendance = $request->$obj_name_atten;
+            $atten->comment = $request->$obj_name_comment;
+            $atten->part_id = $part;
+            $atten->save();
+
+        }
+        return redirect('/dashboard/'.$year.'/'.$month)->with('success', $atten->name . " さんの予定を変更しました");
     }
 
     private function get_Attendances_detail($acts)
