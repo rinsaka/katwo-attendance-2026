@@ -36,9 +36,9 @@
 
             <!-- テキストリンク -->
             <p class="text-start mt-2 mb-0">
-            {{-- <a href="{{ action('Admin\HomeController@time_create') }}"> --}}
+            <a href="{{ route('admin.time_create') }}">
                 活動時間を新規に登録する
-            {{-- </a> --}}
+            </a>
             </p>
 
             <!-- テキストリンク（中央寄せ） -->
