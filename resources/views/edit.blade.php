@@ -156,7 +156,7 @@
                 </form>
 
                 <!-- 削除 -->
-                <form action="{{ url('/dashboard/confirm_delete') }}" method="post">
+                <form action="{{ route('confirm_delete') }}" method="post">
                     {{ csrf_field() }}
                     <input type="hidden" name="year" value="{{ $year }}">
                     <input type="hidden" name="month" value="{{ $month }}">

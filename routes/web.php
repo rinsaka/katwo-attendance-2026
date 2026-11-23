@@ -23,7 +23,10 @@ Route::middleware('auth', 'verified')->group(function () {
 
 
 
-    // Route::post('/home/confirm_delete', 'HomeController@confirm_delete');
+
+    // Route::post('/dashboard/confirm_delete', 'DashboardController@confirm_delete');
+    Route::post('/dashboard/confirm_delete', [DashboardController::class, 'confirm_delete'])->name('confirm_delete');
+
     // Route::get('/home/list', 'HomeController@all_act');
     // Route::get('/home/mail', 'HomeController@mail_footer');
 
@@ -36,6 +39,9 @@ Route::middleware('auth', 'verified')->group(function () {
 
 
     // Route::delete('/home/', 'HomeController@destroy')->name('destroy');
+    Route::delete('/dashboard', [DashboardController::class, 'destroy'])->name('destroy');
+
+
     // Route::get('/menu/create', 'MenusController@create');
     // Route::get('/menu/{id}', 'MenusController@show');
     // Route::get('/menu/{id}/mail', 'MenusController@mail');

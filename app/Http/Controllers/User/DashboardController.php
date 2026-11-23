@@ -502,12 +502,25 @@ class DashboardController extends Controller
 
     public function confirm_delete(Request $request)
     {
-        dd("confirm_delete", $request);
+        return view('delete')
+                ->with('name', $request->name)
+                ->with('year', $request->year)
+                ->with('month', $request->month)
+                ->with('aid', $request->aid)
+                ->with('attens', $request->attens);
     }
 
     public function destroy(Request $request)
     {
-        dd("destroy", $request);
+        if($request->delete_token == $request->confirmation) {
+            foreach($request->attens as $atten) {
+                $attendance = Attendance::where('id', $atten)->first();
+                $attendance->delete();
+            }
+            return redirect('/dashboard/'.$request->year.'/'.$request->month)->with('success', $request->name . " さんの予定を削除しました");
+        } else {
+            return redirect('/dashboard/'.$request->year.'/'.$request->month.'/'.$request->aid.'/edit')->with('error', "予定を削除できません（確認用の文字列を正しく入力してください）");
+        }
     }
 
     public function all_act()
