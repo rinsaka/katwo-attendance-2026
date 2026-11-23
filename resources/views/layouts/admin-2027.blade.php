@@ -99,22 +99,22 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
-                                {{-- <a href="{{ action('Admin\HomeController@userpasswd') }}" class="dropdown-item"> --}}
+                                <a href="{{route('admin.userpasswd') }}" class="dropdown-item">
                                     団員パスワードの変更
-                                {{-- </a> --}}
+                                </a>
                             </li>
                             <li>
-                                {{-- <a href="{{ action('Admin\HomeController@passwd') }}" class="dropdown-item"> --}}
+                                <a href="{{ route('admin.passwd') }}" class="dropdown-item">
                                     管理者パスワードの変更
-                                {{-- </a> --}}
+                                </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{{ route('logout') }}"
+                                <a class="dropdown-item" href="{{ route('admin.logout') }}"
                                 onclick="event.preventDefault();
                                 document.getElementById('logout-form').submit();">
                                 Logout
                             </a>
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                            <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">
                                 {{ csrf_field() }}
                             </form>
                         </li>
@@ -131,15 +131,15 @@
 <footer class="text-bg-secondary text-body-secondary p-4 mt-auto">
     @if (Auth::guard('admin')->user())
     <div class="">
-        {{-- <a href="{{ action('Admin\HomeController@index') }}" class="link-body-emphasis link-underline link-underline-opacity-25 link-underline-opacity-100-hove"> --}}
+        <a href="{{ route('admin.dashboard') }}" class="link-body-emphasis link-underline link-underline-opacity-25 link-underline-opacity-100-hove">
             活動一覧
-        {{-- </a> --}}
+        </a>
     </div>
 
     <div class="">
-        {{-- <a href="{{ action('Admin\HomeController@create') }}" class="link-body-emphasis link-underline link-underline-opacity-25 link-underline-opacity-100-hove"> --}}
+        <a href="{{ route('admin.act_create') }}" class="link-body-emphasis link-underline link-underline-opacity-25 link-underline-opacity-100-hove">
             活動予定を新規登録
-        {{-- </a> --}}
+        </a>
     </div>
 
     <div class="text-end">
@@ -149,15 +149,15 @@
     </div>
 
     <div class="text-end">
-        {{-- <a href="{{ action('Admin\HomeController@place') }}" class="link-body-emphasis link-underline link-underline-opacity-25 link-underline-opacity-100-hove"> --}}
+        <a href="{{ route('admin.place') }}" class="link-body-emphasis link-underline link-underline-opacity-25 link-underline-opacity-100-hove">
             活動施設の一覧表示
-        {{-- </a> --}}
+        </a>
     </div>
 
     <div class="text-end">
-        {{-- <a href="{{ action('Admin\HomeController@time') }}" class="link-body-emphasis link-underline link-underline-opacity-25 link-underline-opacity-100-hove"> --}}
+        <a href="{{ route('admin.time') }}" class="link-body-emphasis link-underline link-underline-opacity-25 link-underline-opacity-100-hove">
             活動時間の一覧表示
-        {{-- </a> --}}
+        </a>
     </div>
     @endif
     <div>
