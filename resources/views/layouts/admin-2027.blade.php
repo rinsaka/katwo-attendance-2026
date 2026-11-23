@@ -149,9 +149,9 @@
     </div>
 
     <div class="text-end">
-        {{-- <a href="{{ action('Admin\HomeController@place') }}" class="link-body-emphasis link-underline link-underline-opacity-25 link-underline-opacity-100-hove"> --}}
+        <a href="{{ route('admin.place') }}" class="link-body-emphasis link-underline link-underline-opacity-25 link-underline-opacity-100-hove">
             活動施設の一覧表示
-        {{-- </a> --}}
+        </a>
     </div>
 
     <div class="text-end">

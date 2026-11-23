@@ -269,4 +269,21 @@ class DashboardController extends Controller
                 ->with('success', '団員 '. $user->login_id . ' のパスワードを変更しました');
     }
 
+    /*
+     *
+     * 練習場所の一覧
+     *
+     */
+    public function place()
+    {
+        $places = Place::orderBy('place')->get();
+        return view('admin.place.index')
+                ->with('places', $places);
+    }
+
+    public function place_edit($pid)
+    {
+        dd($pid);
+    }
+
 }

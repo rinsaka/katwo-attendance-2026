@@ -26,11 +26,14 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::patch('/activity', [DashboardController::class, 'update'])->name('admin_act_update');
     Route::post('/activity', [DashboardController::class, 'store'])->name('admin.act_store');
     Route::delete('/activity/{id}', [DashboardController::class, 'destory'])->name('admin.act_destory');
+    Route::get('/place', [DashboardController::class, 'place'])->name('admin.place');
 
 
-    // Route::get('place', 'Admin\HomeController@place')->name('admin.place');
     // Route::get('place/create', 'Admin\HomeController@place_create');
-    // Route::get('place/{pid}', 'Admin\HomeController@place_edit');
+
+    Route::get('/place/{pid}', [DashboardController::class, 'place_edit'])->name('admin.place_edit');
+
+
     // Route::delete('place/{pid}', 'Admin\HomeController@place_destroy');
     // Route::get('place/{pid}/delete', 'Admin\HomeController@place_delete');
     // Route::patch('place', 'Admin\HomeController@place_update')->name('admin_place_update');
