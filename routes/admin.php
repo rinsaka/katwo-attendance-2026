@@ -41,21 +41,11 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
 
     Route::get('/time', [TimeController::class, 'index'])->name('admin.time');
     Route::get('/time/create', [TimeController::class, 'create'])->name('admin.time_create');
-
-    // Route::get('time/{tid}', 'Admin\HomeController@time_edit')->name('admin.time_edit');
     Route::get('/time/{tid}', [TimeController::class, 'edit'])->name('admin.time_edit');
-
-
-    // Route::get('time/{tid}/delete', 'Admin\HomeController@time_delete');
     Route::get('/time/{tid}/delete', [TimeController::class, 'delete'])->name('admin.time_delete');
-
-    // Route::patch('time', 'Admin\HomeController@time_update')->name('admin_time_update');
     Route::patch('/time', [TimeController::class, 'update'])->name('admin.time_update');
-
     Route::post('/time', [TimeController::class, 'store'])->name('admin.time_store');
-
-
-    // Route::delete('time/{tid}', 'Admin\HomeController@time_destroy');
+    Route::delete('/time/{pid}', [TimeController::class, 'destroy'])->name('admin.time_destroy');
 
 
     Route::get('/password', [PasswordController::class, 'passwd'])->name('admin.passwd');
