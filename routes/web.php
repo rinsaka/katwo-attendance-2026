@@ -29,20 +29,12 @@ Route::middleware('auth', 'verified')->group(function () {
 
 
     Route::get('/dashboard/{year}/{month}', [DashboardController::class, 'show'])->name('show');
-
-    // Route::get('/home/{year}/{month}/create', 'HomeController@create');
     Route::get('/dashboard/{year}/{month}/create', [DashboardController::class, 'create'])->name('create');
-
-
-    // Route::get('/home/{year}/{month}/{aid}/edit', 'HomeController@edit');
     Route::get('/dashboard/{year}/{month}/{aid}/edit', [DashboardController::class, 'edit'])->name('edit');
-
-
-    // Route::post('/home/', 'HomeController@store')->name('store');
     Route::post('/dashboard', [DashboardController::class, 'store'])->name('store');
+    Route::patch('/dashboard', [DashboardController::class, 'update'])->name('update');
 
 
-    // Route::patch('/home/', 'HomeController@update')->name('update');
     // Route::delete('/home/', 'HomeController@destroy')->name('destroy');
     // Route::get('/menu/create', 'MenusController@create');
     // Route::get('/menu/{id}', 'MenusController@show');

@@ -267,7 +267,63 @@ class DashboardController extends Controller
 
     public function edit($year, $month, $aid)
     {
-        dd("edit", $year, $month, $aid);
+        $arg_attendance = Attendance::where('id', '=', $aid)->first();
+        // if (count($arg_attendance)==0) {
+        if (is_null($arg_attendance)) {
+            return redirect('/dashboard/'.$year.'/'.$month)->with('error', "不正なURLです");
+        }
+        $name = $arg_attendance->name;
+        $part = $arg_attendance->part_id;
+
+        $thismonth_head = date("Y-m-01", mktime(0,0,0,$month,1,$year));
+        $thismonth_tail = date("Y-m-t", mktime(0,0,0,$month,1,$year));
+
+
+        $cnt_att = Attendance::select('attendances.*', 'activities.*', 'attendances.id as attendance_id')
+                                    ->join('activities', 'attendances.activity_id', '=', 'activities.id')
+                                    ->where('attendances.name', '=', $name)
+                                    ->where('activities.act_at', '>=', $thismonth_head)
+                                    ->where('activities.act_at', '<=', $thismonth_tail)
+                                    ->orderBy('activities.act_at')
+                                    ->orderBy('meeting', 'DESC')
+                                    ->count();
+        if ($cnt_att == 0) {
+            return redirect('/dashboard/'.$year.'/'.$month)->with('error', "不正なURLです");
+        }
+        $attendances = Attendance::select('attendances.*', 'activities.*', 'attendances.id as attendance_id')
+                                    ->join('activities', 'attendances.activity_id', '=', 'activities.id')
+                                    ->where('attendances.name', '=', $name)
+                                    ->where('activities.act_at', '>=', $thismonth_head)
+                                    ->where('activities.act_at', '<=', $thismonth_tail)
+                                    ->orderBy('activities.act_at')
+                                    ->orderBy('meeting', 'DESC')
+                                    ->get();
+        // if (count($attendances)==0) {
+        //     return redirect('/home/'.$year.'/'.$month)->with('error', "不正なURLです");
+        // }
+
+        foreach ($attendances as $attendance) {
+            $attendance->id = $attendance->attendance_id;
+        }
+        // dd($attendances);
+        $activities = Activity::where('activities.act_at', '>=', $thismonth_head)
+                                    ->where('activities.act_at', '<=', $thismonth_tail)
+                                    ->get();
+        $n_act = count($activities);
+        $parts = Part::orderBy('id')->get();
+
+        // dd("edit", $year, $month, $aid, $arg_attendance, $name, $part, $attendances);
+
+        return view('edit')
+                ->with('activities', $activities)
+                ->with('n_act', $n_act)
+                ->with('parts', $parts)
+                ->with('year', $year)
+                ->with('month', $month)
+                ->with('name', $name)
+                ->with('part_id', $part)
+                ->with('aid', $aid)
+                ->with('attendances', $attendances);
     }
 
     public function update(Request $request)
