@@ -99,9 +99,9 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
-                                {{-- <a href="{{ action('Admin\HomeController@userpasswd') }}" class="dropdown-item"> --}}
+                                <a href="{{route('admin.userpasswd') }}" class="dropdown-item">
                                     団員パスワードの変更
-                                {{-- </a> --}}
+                                </a>
                             </li>
                             <li>
                                 <a href="{{ route('admin.passwd') }}" class="dropdown-item">

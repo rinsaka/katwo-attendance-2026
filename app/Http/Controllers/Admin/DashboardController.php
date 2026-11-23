@@ -9,6 +9,7 @@ use App\Models\Activity;
 use App\Models\Time;
 use App\Models\Place;
 use App\Models\Attendance;
+use App\Models\User;
 
 class DashboardController extends Controller
 {
@@ -224,6 +225,48 @@ class DashboardController extends Controller
         $admin->save();
         return redirect('/admin/dashboard')
                 ->with('success', 'パスワードを変更しました');
+    }
+
+    /*
+     *   ユーザ（団員）パスワードの変更画面
+     */
+    public function userpasswd()
+    {
+        $admin = \Auth::user();
+        return view('admin.userpasswd')
+                ->with('id', $admin->id);
+    }
+
+    public function userpasswd_update(Request $request)
+    {
+        $admin = \Auth::user();
+        // 管理者パスワードを確認
+        if (!password_verify($request->password, $admin->password)) {
+            return redirect('/admin/userpassword')
+                ->with('error', '管理者パスワードが違います');
+        }
+        // Validation（6文字以上あるかなどのチェック）
+        $validated = $request->validate([
+            'login_id' => ['required'],
+            'new_password' => ['required', 'string', 'min:6'],
+        ]);
+
+        // Validation（2つが一致しているかのチェック）
+        if ($request->new_password != $request->new_password_confirm) {
+            return redirect('/admin/userpassword')
+                ->with('error', '新しいパスワード（と確認用）が一致しません');
+        }
+
+        $user = User::where('login_id', '=', $request->login_id)->first();
+        if (!$user) {
+            return redirect('/admin/userpassword')
+                ->with('error', '団員のログインIDが違います');
+        }
+        // パスワードを保存
+        $user->password = bcrypt($request->new_password);
+        $user->save();
+        return redirect('/admin/dashboard')
+                ->with('success', '団員 '. $user->login_id . ' のパスワードを変更しました');
     }
 
 }

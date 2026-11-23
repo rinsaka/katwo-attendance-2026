@@ -47,9 +47,10 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::get('/password', [DashboardController::class, 'passwd'])->name('admin.passwd');
     Route::patch('/password', [DashboardController::class, 'passwd_update'])->name('admin.passwd_update');
 
+    Route::get('/userpassword', [DashboardController::class, 'userpasswd'])->name('admin.userpasswd');
+    Route::patch('/userpassword', [DashboardController::class, 'userpasswd_update'])->name('admin.userpasswd_update');
 
-    // Route::get('userpassword', 'Admin\HomeController@userpasswd');
-    // Route::patch('userpassword', 'Admin\HomeController@userpasswd_update')->name('admin.userpasswd');
+
     // Route::get('mailinfo', 'Admin\MailinfosController@edit');
     // Route::post('mailinfo', 'Admin\MailinfosController@update')->name('admin.mailinfo');
 });
