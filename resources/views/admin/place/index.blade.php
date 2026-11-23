@@ -37,9 +37,9 @@
 
             <!-- テキストリンク（中央寄せ） -->
             <p class="text-center mt-2 mb-0">
-                {{-- <a href="{{ action('Admin\HomeController@place_create') }}"> --}}
+                <a href="{{ route('admin.place_create') }}">
                     活動施設を新規に登録する
-                {{-- </a> --}}
+                </a>
             </p>
 
             <!-- テキストリンク（中央寄せ） -->

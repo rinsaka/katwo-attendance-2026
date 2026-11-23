@@ -331,6 +331,37 @@ class DashboardController extends Controller
             ->with('success', "活動施設情報を更新しました");
     }
 
+    public function place_create()
+    {
+        return view('admin.place.create');
+    }
+
+    public function place_store(Request $request)
+    {
+        $validated = $request->validate([
+            'place' => [
+                'required',
+                'max:100',
+                Rule::unique('places'),
+            ],
+        ]);
+
+        $place = new Place();
+        $place->place = $request->place;
+        if (isset($request->default_place)) {
+            // デフォルト活動場所が変更された
+            $prev_default = Place::where('default_place', '=', 1)->first();
+            $prev_default->default_place = 0;
+            $prev_default->save();
+            $place->default_place = 1;
+        } else {
+            $place->default_place = 0;
+        }
+        $place->save();
+        return redirect()->route('admin.place')
+                    ->with('success', "活動施設情報を登録しました");
+    }
+
     public function place_delete($pid)
     {
         dd("place delete", $pid);

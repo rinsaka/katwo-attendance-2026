@@ -27,25 +27,18 @@ Route::middleware('auth:admin')->prefix('admin')->group(function () {
     Route::post('/activity', [DashboardController::class, 'store'])->name('admin.act_store');
     Route::delete('/activity/{id}', [DashboardController::class, 'destory'])->name('admin.act_destory');
     Route::get('/place', [DashboardController::class, 'place'])->name('admin.place');
-
-
-    // Route::get('place/create', 'Admin\HomeController@place_create');
-
+    Route::get('/place/create', [DashboardController::class, 'place_create'])->name('admin.place_create');
     Route::get('/place/{pid}', [DashboardController::class, 'place_edit'])->name('admin.place_edit');
 
 
     // Route::delete('place/{pid}', 'Admin\HomeController@place_destroy');
 
-    // Route::get('place/{pid}/delete', 'Admin\HomeController@place_delete');
+
     Route::get('/place/{pid}/delete', [DashboardController::class, 'place_delete'])->name('admin.place_delete');
-
-
-
-    // Route::patch('place', 'Admin\HomeController@place_update')->name('admin_place_update');
     Route::patch('/place', [DashboardController::class, 'place_update'])->name('admin.place_update');
+    Route::post('/place', [DashboardController::class, 'place_store'])->name('admin.place_store');
 
-
-    // Route::post('place', 'Admin\HomeController@place_store')->name('admin_place_store');
+    
     // Route::get('time', 'Admin\HomeController@time')->name('admin.time');
     // Route::get('time/create', 'Admin\HomeController@time_create');
     // Route::get('time/{tid}', 'Admin\HomeController@time_edit')->name('admin.time_edit');
