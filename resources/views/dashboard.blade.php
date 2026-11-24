@@ -70,13 +70,13 @@
                             @foreach ($activity->menus as $menu)
                                 {{ $menu }} <br>
                             @endforeach
-                            <a href="">
+                            <a href="{{ route('menu_show', [$activity->menu->id]) }}">
                                 <span class="" style="font-size: 80%;">[練習メニューを編集する]</span>
                             </a>
                         @else
                             <span class="text-body-primary" style="font-size: 80%;">
                                 練習メニューはまだ登録されていません
-                                <a href="">
+                                <a href="{{ route('menu_create', ['aid' => $activity->id]) }}">
                                     [登録する]
                                 </a>
                             </span>
@@ -180,13 +180,13 @@
                         @foreach ($activity->menus as $menu)
                         {{ $menu }} <br>
                         @endforeach
-                        <a href="">
+                        <a href="{{ route('menu_show', [$activity->menu->id]) }}">
                         <span class="" style="font-size: 80%;">[練習メニューを編集する]</span>
                         </a>
                     @else
                         <span class="text-body-tertiary" style="font-size: 80%;">
                         練習メニューはまだ登録されていません
-                        <a href="">
+                        <a href="{{ route('menu_create', ['aid' => $activity->id]) }}">
                             [登録する]
                         </a>
                         </span>
