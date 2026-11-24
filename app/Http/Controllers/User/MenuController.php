@@ -24,7 +24,20 @@ class MenuController extends Controller
 
     public function update(Request $request)
     {
-        dd('update', $request);
+        $validated = $request->validate([
+            'name' => ['required', 'max:30'],
+            'menu' => ['required'],
+        ]);
+
+        $menu = Menu::where('id', '=', $request->mid)->first();
+        if (!$menu) {
+            return redirect('/dashboard')->with('status', '練習メニューが見つかりません');
+        }
+        $menu->name = $request->name;
+        $menu->menu = $request->menu;
+        $menu->save();
+
+        return redirect($request->url)->with('status', '練習メニューを更新しました');
     }
 
     public function create(Request $request)
