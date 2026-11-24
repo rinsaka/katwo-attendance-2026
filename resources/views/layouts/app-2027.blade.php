@@ -117,9 +117,9 @@
             </p>
         @endif
         <div class="text-end">
-            {{-- <a href="{{ action('HomeController@mail_footer') }}" class="text-bg-secondary"> --}}
+            <a href="{{ route('mail_footer') }}" class="text-bg-secondary">
                 メールフッタ
-            {{-- </a> --}}
+            </a>
         </div>
     @endif
     <div>

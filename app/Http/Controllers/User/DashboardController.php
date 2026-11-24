@@ -560,6 +560,10 @@ class DashboardController extends Controller
 
     public function mail_footer()
     {
-        dd("mail_footer");
+        $mailinfo = Mailinfo::where('key', '=', 'signiture')->first();
+        if (!$mailinfo) {
+            return redirect('/dashboard')->with('error', "メールフッタが未登録です");
+        }
+        return view('mailfooter')->with('mailinfo', $mailinfo);
     }
 }

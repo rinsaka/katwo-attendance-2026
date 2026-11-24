@@ -21,12 +21,11 @@ Route::middleware('auth')->group(function () {
 Route::middleware('auth', 'verified')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/dashboard/confirm_delete', [DashboardController::class, 'confirm_delete'])->name('confirm_delete');
-
-    // Route::get('/home/list', 'HomeController@all_act');
     Route::get('/dashboard/list', [DashboardController::class, 'all_act'])->name('all_act');
 
 
     // Route::get('/home/mail', 'HomeController@mail_footer');
+    Route::get('/dashboard/mail', [DashboardController::class, 'mail_footer'])->name('mail_footer');
 
 
     Route::get('/dashboard/{year}/{month}', [DashboardController::class, 'show'])->name('show');
