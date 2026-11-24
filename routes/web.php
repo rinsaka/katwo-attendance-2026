@@ -47,6 +47,8 @@ Route::middleware('auth', 'verified')->group(function () {
 
 
     // Route::post('/menu', 'MenusController@store')->name('menu_store');
+    Route::post('/menu', [MenuController::class, 'store'])->name('menu_store');
+
 });
 
 require __DIR__.'/auth.php';

@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Menu;
-// use App\Models\Activity;
+use App\Models\Activity;
 // use App\Models\Mailinfo;
 // use Carbon\Carbon;
 
@@ -42,7 +42,12 @@ class MenuController extends Controller
 
     public function create(Request $request)
     {
-        dd('create', $request);
+        $activity = Activity::where('id', '=', $request->aid)->first();
+        if (!$activity) {
+            return redirect('/dashboard')->with('status', 'アクティビティが見つかりません');
+        }
+        return view('menu.create')
+                ->with('activity', $activity);
     }
 
     public function store(Request $request)
