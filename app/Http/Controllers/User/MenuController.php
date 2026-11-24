@@ -52,7 +52,18 @@ class MenuController extends Controller
 
     public function store(Request $request)
     {
-        dd('store', $request);
+        $validated = $request->validate([
+            'name' => ['required', 'max:30'],
+            'menu' => ['required'],
+        ]);
+
+        $menu = new Menu();
+        $menu->activity_id = $request->aid;
+        $menu->name = $request->name;
+        $menu->menu = $request->menu;
+        $menu->save();
+
+        return redirect($request->url)->with('status', '練習メニューを登録しました');
     }
 
     /*

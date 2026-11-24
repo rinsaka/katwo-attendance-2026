@@ -31,22 +31,10 @@ Route::middleware('auth', 'verified')->group(function () {
     Route::patch('/dashboard', [DashboardController::class, 'update'])->name('update');
     Route::delete('/dashboard', [DashboardController::class, 'destroy'])->name('destroy');
 
-
-    // Route::get('/menu/create', 'MenusController@create');
     Route::get('/menu/create', [MenuController::class, 'create'])->name('menu_create');
-
-
-    // Route::get('/menu/{id}', 'MenusController@show');
     Route::get('/menu/{id}', [MenuController::class, 'show'])->name('menu_show');
-
-    // Route::get('/menu/{id}/mail', 'MenusController@mail');
     Route::get('/menu/{id}/mail', [MenuController::class, 'mail'])->name('menu_mail');
-
-    // Route::patch('/menu', 'MenusController@update')->name('menu_update');
     Route::patch('/menu', [MenuController::class, 'update'])->name('menu_update');
-
-
-    // Route::post('/menu', 'MenusController@store')->name('menu_store');
     Route::post('/menu', [MenuController::class, 'store'])->name('menu_store');
 
 });
