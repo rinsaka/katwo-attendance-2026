@@ -4,11 +4,566 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+
+use App\Models\Activity;
+use App\Models\Part;
+use App\Models\Attendance;
+use App\Models\Mailinfo;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        return view('dashboard');
+        // 今月
+        $thismonth_head = date('Y-m-01',time());
+        $thismonth_tail = date('Y-m-t',time());
+        $this_year = date('Y',time());
+        $this_month = date('m',time());
+        // 先月
+        $prev_year = date('Y', strtotime('-1 month'));
+        $prev_month = date('m', strtotime('-1 month'));
+        // 来月
+        $next_year = date('Y', strtotime('+1 month'));
+        $next_month = date('m', strtotime('+1 month'));
+        // dd($thismonth_head, $thismonth_tail, $prev_year, $prev_month, $next_year, $next_month);
+
+        // Activity を取得
+        $activities = Activity::where('act_at', '>=', $thismonth_head)
+                                ->where('act_at', '<=', $thismonth_tail)
+                                ->orderBy('act_at')
+                                ->orderBy('meeting', 'DESC')
+                                ->get();
+        // 各アクティビティについていろいろと取得する
+        $activities = $this->get_Attendances_detail($activities);
+        $iter = 0;
+        foreach ($activities as $activity) {
+            $activity->class_expansion_link = "expansion_link" . $iter;
+            $activity->class_attendance = "attendance" . $iter;
+            $iter++;
+        }
+        // dd($activities, $activities[0], $activities[0]->attens, $activities[0]->attens[0]);
+
+        // 改行を含む Menu をリストに変換
+        foreach ($activities as $activity) {
+            if ($activity->menu) {
+                $array = explode("\n", $activity->menu->menu); // 行に分割
+                $array = array_map('trim', $array); // 各行にtrim()をかける
+            } else {
+                // @codeCoverageIgnoreStart
+                $array = array();
+                // @codeCoverageIgnoreEnd
+            }
+            $activity->menus = $array;
+
+            // 新規登録と更新情報を設定
+            if ($activity->menu) {
+                // 最終更新からの経過時間を分単位で取得する
+                $minutes_from_update = (strtotime("now") - strtotime($activity->menu->updated_at)) / 60;
+                // 「新規」と「更新」を初期化
+                $activity->menu->new = false;
+                $activity->menu->update = false;
+                // 定数で指定された時間より短ければ「新規」または「更新」を設定する
+                if ($minutes_from_update < \Config::get('const.NEW_THRESHOLD')) {
+                    if ($activity->menu->created_at == $activity->menu->updated_at) {
+                        $activity->menu->new = true;
+                    } else {
+                        $activity->menu->update = true;
+                    }
+                }
+            }
+        }
+
+        return view('dashboard')
+                ->with('activities', $activities)
+                ->with('prev_year', $prev_year)
+                ->with('prev_month', $prev_month)
+                ->with('next_year', $next_year)
+                ->with('next_month', $next_month)
+                ->with('this_year', $this_year)
+                ->with('this_month', $this_month);
+    }
+
+    public function show($year, $month)
+    {
+        // URL の Validation
+        if ($year > 2080 || $year < 2017 || $month < 1 || $month > 12) {
+            return redirect('/home/')->with('error', "不正なURLです！");
+        } // まだ home/2018/11.2/ のような場合も動いてしまう．この後 (int) でキャストしているので問題なし．
+
+        $thismonth_head = date("Y-m-01", mktime(0,0,0,$month,1,$year));
+        $thismonth_tail = date("Y-m-t", mktime(0,0,0,$month,1,$year));
+        $this_year = $year;
+        $this_month = $month;
+
+        $year = (int) $year;
+        $month = (int) $month;
+        if($month == 1) {
+            $prev_year = $year - 1;
+            $prev_month = 12;
+            $next_year = $year;
+            $next_month = 2;
+        } elseif ($month == 12) {
+            $prev_year = $year;
+            $prev_month = 11;
+            $next_year = $year + 1;
+            $next_month = 1;
+        } else {
+            $prev_year = $year;
+            $prev_month = $month - 1;
+            $next_year = $year;
+            $next_month = $month + 1;
+        }
+        // dd($thismonth_head, $thismonth_tail, $prev_year, $prev_month, $next_year, $next_month);
+        // dd($year, $month, $thismonth_head, $thismonth_tail);
+
+        $activities = Activity::where('act_at', '>=', $thismonth_head)
+                                ->where('act_at', '<=', $thismonth_tail)
+                                ->orderBy('act_at')
+                                ->orderBy('meeting', 'DESC')
+                                ->get();
+        // 各アクティビティについていろいろと取得する
+        $activities = $this->get_Attendances_detail($activities);
+        $iter = 0;
+        foreach ($activities as $activity) {
+            $activity->class_expansion_link = "expansion_link" . $iter;
+            $activity->class_attendance = "attendance" . $iter;
+            $iter++;
+        }
+        // dd($activities);
+
+        // 改行を含む Menu をリストに変換
+        foreach ($activities as $activity) {
+            if ($activity->menu) {
+                $array = explode("\n", $activity->menu->menu); // 行に分割
+                $array = array_map('trim', $array); // 各行にtrim()をかける
+            } else {
+                $array = array();
+            }
+            $activity->menus = $array;
+
+            // 新規登録と更新情報を設定
+            if ($activity->menu) {
+                // 最終更新からの経過時間を分単位で取得する
+                $minutes_from_update = (strtotime("now") - strtotime($activity->menu->updated_at)) / 60;
+                // 「新規」と「更新」を初期化
+                $activity->menu->new = false;
+                $activity->menu->update = false;
+                // 定数で指定された時間より短ければ「新規」または「更新」を設定する
+                if ($minutes_from_update < \Config::get('const.NEW_THRESHOLD')) {
+                    if ($activity->menu->created_at == $activity->menu->updated_at) {
+                        $activity->menu->new = true;
+                    } else {
+                        $activity->menu->update = true;
+                    }
+                }
+            }
+        }
+
+        return view('dashboard')
+                ->with('activities', $activities)
+                ->with('prev_year', $prev_year)
+                ->with('prev_month', $prev_month)
+                ->with('next_year', $next_year)
+                ->with('next_month', $next_month)
+                ->with('this_year', $this_year)
+                ->with('this_month', $this_month);
+
+    }
+
+    public function create($year, $month)
+    {
+        // dd("create", $year, $month);
+        $thismonth_head = date("Y-m-01", mktime(0,0,0,$month,1,$year));
+        $thismonth_tail = date("Y-m-t", mktime(0,0,0,$month,1,$year));
+
+        $activities = Activity::where('act_at', '>=', $thismonth_head)
+                                ->where('act_at', '<=', $thismonth_tail)
+                                ->orderBy('act_at')
+                                ->orderBy('meeting', 'DESC')
+                                ->get();
+        $n_act = count($activities);
+
+        if ($n_act == 0) {
+            return redirect('/dashboard/'.$year.'/'.$month)->with('error', "活動予定がまだ登録されていません");
+        }
+
+        $parts = Part::orderBy('id')->get();
+        // dd('create', $year, $month, $activities, $parts, $n_act);
+        return view('create')
+                ->with('activities', $activities)
+                ->with('n_act', $n_act)
+                ->with('parts', $parts)
+                ->with('year', $year)
+                ->with('month', $month);
+    }
+
+    public function store(Request $request)
+    {
+        // $request->name = trim(mb_convert_kana($request->name, 's', 'UTF-8')); // 全角スペースを半角スペースに置換したあと，トリム
+
+        $request->merge([
+            'name' => trim(mb_convert_kana($request->name ?? '', 's', 'UTF-8'))
+        ]);
+
+        $validated = $request->validate([
+            'part' => ['required', 'min:1'],
+            'name' => ['required', 'max:30'], // 入力が必須で，最大30文字
+        ]);
+
+        $name = $request->name;
+        $part = $request->part;
+        $n_act = $request->n_act;
+        $year = $request->year;
+        $month = $request->month;
+
+        // @codeCoverageIgnoreStart
+        if (strlen($name)==0) {
+            return redirect('/dashboard/'.$year.'/'.$month .'/create')->with('error', "名前が入力されていません");
+        }
+        // @codeCoverageIgnoreEnd
+
+        $thismonth_head = date("Y-m-01", mktime(0,0,0,$month,1,$year));
+        $thismonth_tail = date("Y-m-t", mktime(0,0,0,$month,1,$year));
+
+        $activities = Activity::where('act_at', '>=', $thismonth_head)
+                                ->where('act_at', '<=', $thismonth_tail)
+                                ->get();
+        // 名前の重複チェック
+        foreach ($activities as $activity) {
+            $act_id = $activity->id;
+            $attens = Attendance::where('activity_id', '=', $act_id)->get();
+            foreach ($attens as $atten) {
+                if ($atten->name == $name) {
+                    return redirect('/dashboard/'.$year.'/'.$month .'/create')->with('error', "登録できませんでした！同じ名前の予定が登録済みです");
+                }
+            }
+        }
+
+        // ここで validation
+        foreach ($activities as $activity) {
+            $obj_name_comment = "comment" . $activity->id;
+            $validated = $request->validate([
+                $obj_name_comment => ['max:140'],
+            ]);
+        }
+
+        foreach ($activities as $activity) {
+            $obj_name_act = "act" . $activity->id;
+            $obj_name_comment = "comment" . $activity->id;
+            // var_dump($obj_name, $request->$obj_name);
+
+            $attendance = new Attendance;
+            $attendance->name = $name;
+            $attendance->activity_id = $activity->id;
+            $attendance->attendance = $request->$obj_name_act;
+            $attendance->comment = $request->$obj_name_comment;
+            $attendance->part_id = $part;
+
+            $attendance->save();
+        }
+        return redirect('/dashboard/'.$year.'/'.$month)->with('success', $name . " さんの予定を登録しました");
+    }
+
+    public function edit($year, $month, $aid)
+    {
+        $arg_attendance = Attendance::where('id', '=', $aid)->first();
+        // if (count($arg_attendance)==0) {
+        if (is_null($arg_attendance)) {
+            return redirect('/dashboard/'.$year.'/'.$month)->with('error', "不正なURLです");
+        }
+        $name = $arg_attendance->name;
+        $part = $arg_attendance->part_id;
+
+        $thismonth_head = date("Y-m-01", mktime(0,0,0,$month,1,$year));
+        $thismonth_tail = date("Y-m-t", mktime(0,0,0,$month,1,$year));
+
+
+        $cnt_att = Attendance::select('attendances.*', 'activities.*', 'attendances.id as attendance_id')
+                                    ->join('activities', 'attendances.activity_id', '=', 'activities.id')
+                                    ->where('attendances.name', '=', $name)
+                                    ->where('activities.act_at', '>=', $thismonth_head)
+                                    ->where('activities.act_at', '<=', $thismonth_tail)
+                                    ->orderBy('activities.act_at')
+                                    ->orderBy('meeting', 'DESC')
+                                    ->count();
+        if ($cnt_att == 0) {
+            return redirect('/dashboard/'.$year.'/'.$month)->with('error', "不正なURLです");
+        }
+        $attendances = Attendance::select('attendances.*', 'activities.*', 'attendances.id as attendance_id')
+                                    ->join('activities', 'attendances.activity_id', '=', 'activities.id')
+                                    ->where('attendances.name', '=', $name)
+                                    ->where('activities.act_at', '>=', $thismonth_head)
+                                    ->where('activities.act_at', '<=', $thismonth_tail)
+                                    ->orderBy('activities.act_at')
+                                    ->orderBy('meeting', 'DESC')
+                                    ->get();
+        // if (count($attendances)==0) {
+        //     return redirect('/home/'.$year.'/'.$month)->with('error', "不正なURLです");
+        // }
+
+        foreach ($attendances as $attendance) {
+            $attendance->id = $attendance->attendance_id;
+        }
+        // dd($attendances);
+        $activities = Activity::where('activities.act_at', '>=', $thismonth_head)
+                                    ->where('activities.act_at', '<=', $thismonth_tail)
+                                    ->get();
+        $n_act = count($activities);
+        $parts = Part::orderBy('id')->get();
+
+        // dd("edit", $year, $month, $aid, $arg_attendance, $name, $part, $attendances);
+
+        return view('edit')
+                ->with('activities', $activities)
+                ->with('n_act', $n_act)
+                ->with('parts', $parts)
+                ->with('year', $year)
+                ->with('month', $month)
+                ->with('name', $name)
+                ->with('part_id', $part)
+                ->with('aid', $aid)
+                ->with('attendances', $attendances);
+    }
+
+    public function update(Request $request)
+    {
+        // dd("update", $request);
+        $part = $request->part;
+        $n_act = $request->n_act;
+        $year = $request->year;
+        $month = $request->month;
+        $aid = $request->aid;
+        $name = $request->name;
+
+        $thismonth_head = date("Y-m-01", mktime(0,0,0,$month,1,$year));
+        $thismonth_tail = date("Y-m-t", mktime(0,0,0,$month,1,$year));
+
+        $attendances = Attendance::select('attendances.*', 'activities.*', 'attendances.id as attendance_id')
+                                    ->join('activities', 'attendances.activity_id', '=', 'activities.id')
+                                    ->where('attendances.name', '=', $name)
+                                    ->where('activities.act_at', '>=', $thismonth_head)
+                                    ->where('activities.act_at', '<=', $thismonth_tail)
+                                    ->get();
+        foreach ($attendances as $attendance) {
+            $attendance->id = $attendance->attendance_id;
+        }
+
+        // ここで validation
+        foreach ($attendances as $attendance) {
+            $obj_name_comment = "comment" . $attendance->id;
+
+            $validated = $request->validate([
+                $obj_name_comment => ['max:140'],
+            ]);
+        }
+
+        // dd($request);
+
+        // $this->validate($request, [
+        //   'part' => 'required|min:1',
+        //   'name' => 'required|max:100'  // 入力が必須で，最大100文字
+        // ]);
+        //
+
+        foreach ($attendances as $attendance) {
+            $obj_name_atten = "atten" . $attendance->id;
+            $obj_name_comment = "comment" . $attendance->id;
+            // var_dump($obj_name, $request->$obj_name);
+            $atten = Attendance::where('id', '=', $attendance->id)
+                                    ->first();
+            $atten->attendance = $request->$obj_name_atten;
+            $atten->comment = $request->$obj_name_comment;
+            $atten->part_id = $part;
+            $atten->save();
+
+        }
+        return redirect('/dashboard/'.$year.'/'.$month)->with('success', $atten->name . " さんの予定を変更しました");
+    }
+
+    private function get_Attendances_detail($acts)
+    {
+        foreach ($acts as $act) {
+            // attendance ごとの合計を取得
+            $atten = array();
+            for ($i = 0 ; $i <= 3; $i++) {
+                $atten[]  = Attendance::where('activity_id', '=', $act->id)
+                                        ->where('attendance', '=', $i)->count();
+            }
+            // 登録者数の合計
+            $atten[] = 0;
+            for ($i = 0 ; $i <= 3; $i++) {
+                $atten[4]  += $atten[$i];
+            }
+            $act->n_atten = $atten;
+
+            // 会議対象外の数
+            $act->n_not_members = Attendance::where('activity_id', '=', $act->id)
+                                        ->where('attendance', '=', -1)->count();
+
+            // パートごと
+            foreach ($acts as $act) {
+                $parts = Part::orderBy('id')->get();
+                foreach ($parts as $part) {
+                    // 人数を集計する
+                    $part_atten = array();
+                    for ($i = 0 ; $i <= 3; $i++) {
+                        $part_atten[]  = Attendance::where('activity_id', '=', $act->id)
+                                                ->where('part_id', '=', $part->id)
+                                                ->where('attendance', '=', $i)->count();
+                    }
+                    $part->n_atten = $part_atten;
+                    // 回答のリストを取得
+                    $part->attendances = Attendance::where('activity_id', '=', $act->id)
+                                            ->where('part_id', '=', $part->id)
+                                            ->orderBy('attendance', 'DESC')
+                                            ->orderBy('updated_at')
+                                            ->get();
+                    // 新規登録と更新情報を設定
+                    foreach ($part->attendances as $attendance) {
+                        // 最終更新からの経過時間を分単位で取得する
+                        $minutes_from_update = (strtotime("now") - strtotime($attendance->updated_at)) / 60;
+                        // 「新規」と「更新」を初期化
+                        $attendance->new = false;
+                        $attendance->update = false;
+                        // 定数で指定された時間より短ければ「新規」または「更新」を設定する
+                        if ($minutes_from_update < \Config::get('const.NEW_THRESHOLD')) {
+                            if ($attendance->created_at == $attendance->updated_at) {
+                                $attendance->new = true;
+                            } else {
+                                $attendance->update = true;
+                            }
+                        }
+                    }
+
+                    // コメントをトリミング
+                    foreach ($part->attendances as $attendance) {
+                        $comment = $attendance->comment ?? '';
+                        $attendance->comment_trim = $comment;
+                        if (mb_strlen($comment) > 18) {
+                            $attendance->comment_trim = mb_substr($comment, 0, 16) . "...";
+                        }
+                    }
+                }
+                $act->parts = $parts;
+            }
+
+            // 出席形態ごと
+            foreach ($acts as $act) {
+                $atten_ids = array(3, 1, 0, -1);
+                $attens = collect();
+                // 出席形態ごとに回答のリストを取得
+                foreach ($atten_ids as $key => $atten_id) {
+                    $atten = Attendance::where('activity_id', '=', $act->id)
+                                ->where('attendance', '=', $atten_id)
+                                ->orderBy('part_id')
+                                ->orderBy('updated_at')
+                                ->get();
+                    $attens[] = $atten;
+                }
+                // 新規登録と更新情報を設定
+                foreach ($attens as $attendances) {
+                    foreach($attendances as $attendance) {
+                        // 最終更新からの経過時間を分単位で取得する
+                        $minutes_from_update = (strtotime("now") - strtotime($attendance->updated_at)) / 60;
+                        // 「新規」と「更新」を初期化
+                        $attendance->new = false;
+                        $attendance->update = false;
+                        // 定数で指定された時間より短ければ「新規」または「更新」を設定する
+                        if ($minutes_from_update < \Config::get('const.NEW_THRESHOLD')) {
+                            if ($attendance->created_at == $attendance->updated_at) {
+                                $attendance->new = true;
+                            } else {
+                                $attendance->update = true;
+                            }
+                        }
+                    }
+
+                }
+                // コメントをトリミング
+                // dd($attens);
+                foreach ($attens as $attendances) {
+                    foreach ($attendances as $attendance){
+                        $comment = $attendance->comment ?? '';
+                        $attendance->comment_trim = $comment;
+                        if (mb_strlen($comment) > 18) {
+                            $attendance->comment_trim = mb_substr($comment, 0, 16) . "...";
+                        }
+                    }
+                }
+
+                $act->attens = $attens;
+            }
+        }
+        // dd($acts);
+        return $acts;
+    }
+
+
+    public function confirm_delete(Request $request)
+    {
+        return view('delete')
+                ->with('name', $request->name)
+                ->with('year', $request->year)
+                ->with('month', $request->month)
+                ->with('aid', $request->aid)
+                ->with('attens', $request->attens);
+    }
+
+    public function destroy(Request $request)
+    {
+        if($request->delete_token == $request->confirmation) {
+            foreach($request->attens as $atten) {
+                $attendance = Attendance::where('id', $atten)->first();
+                $attendance->delete();
+            }
+            return redirect('/dashboard/'.$request->year.'/'.$request->month)->with('success', $request->name . " さんの予定を削除しました");
+        } else {
+            return redirect('/dashboard/'.$request->year.'/'.$request->month.'/'.$request->aid.'/edit')->with('error', "予定を削除できません（確認用の文字列を正しく入力してください）");
+        }
+    }
+
+    public function all_act()
+    {
+        // すべての Activity を取得
+        $activities = Activity::orderBy('act_at')
+                                ->orderBy('meeting', 'DESC')
+                                ->get();
+        // 月ごとにまとめる
+        $month_acts = array();
+        $m_prev = 0;
+        foreach ($activities as $activity) {
+            $y = date('Y', strtotime($activity->act_at));
+            $m = date('m', strtotime($activity->act_at));
+            $d = date('d', strtotime($activity->act_at));
+            // 次が変われば行を追加
+            if ($m_prev != $m) {
+                $month_acts[] = "【" . $y . "年" . $m . "月】";
+            }
+            $act = $y . "年" . $m . "月" . $d . "日" . parent::get_youbi($activity->act_at);
+            $act = $act . " " . $activity->time->jikan;
+            if ($activity->meeting=="1") {
+                $act = $act . " " . "【一部団員に限定した活動です】" ;
+            }
+            $month_acts[] = $act; // 追加（改行）
+            $act = "　" . $activity->place->place . " " . $activity->note;
+            $month_acts[] = $act; // 追加（改行）
+            $m_prev = $m;
+
+            // $activity->y = $y;
+            // $activity->m = $m;
+            // $activity->d = $d;
+        }
+        return view('list')
+                ->with('month_acts', $month_acts);
+    }
+
+    public function mail_footer()
+    {
+        $mailinfo = Mailinfo::where('key', '=', 'signiture')->first();
+        if (!$mailinfo) {
+            return redirect('/dashboard')->with('error', "メールフッタが未登録です");
+        }
+        return view('mailfooter')->with('mailinfo', $mailinfo);
     }
 }
