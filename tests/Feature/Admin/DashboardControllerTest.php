@@ -73,9 +73,14 @@ class DashboardControllerTest extends TestCase
         $activity_ids = DB::table('activities')->select('id')->orderBy('id')->get();
         $activity_ids->prepend(0);  // 先頭に要素を追加（id と インデックスを同じにしたい）
 
+        $part_ids = DB::table('parts')->select('id')->orderBy('id')->get();
+        $part_ids->prepend(0);  // 先頭に要素を追加（id と インデックスを同じにしたい）
+
 
 
         $admin = Admin::where('login_id', 'taro')->first();
+        $user = User::where('login_id', 'user_a')->first();
+
         // dd($admin);
         $response = $this->actingAs($admin, 'admin')
                         ->get('/admin/dashboard/')
@@ -181,9 +186,60 @@ class DashboardControllerTest extends TestCase
         //
         //
         //
-        // --- testEditAsAdmin --------------------------
+        // --- testEditAsUser --------------------------
         //
         //
+        // ユーザで出席登録
+        // list($year,$month,$day) = explode('-', $acts[18]);
+        $response = $this->actingAs($user)
+                        ->json('POST', '/dashboard', [
+                            'year' => $year,
+                            'month' => $month,
+                            'n_act' => "1",
+                            'part' => $part_ids[9],
+                            'name' => "天然記念物",
+                            'act19' => "3",
+                            'comment19' => "参加します．このあと，スケジュールが追加されます"
+                        ]);
+        //
+        //
+        // --- testCreateAsAdmin2 --------------------------
+        //
+        // 7ヶ月先の予定(2回目)を追加
+        $response = $this->actingAs($admin, 'admin')
+                        ->json('POST', '/admin/activity', [
+                            'act_at' => $acts[19],
+                            'time' => $time_ids[1],
+                            'place' => $place_ids[1],
+                            'note' => "さらに追加された日程です"
+                        ]);
+        //
+        // 7ヶ月先の予定(3回目：選曲委員会)をさらに追加
+        $response = $this->actingAs($admin, 'admin')
+                        ->json('POST', '/admin/activity', [
+                            'act_at' => $acts[19],
+                            'time' => null,
+                            'place' => $place_ids[2],
+                            'note' => "選曲委員会 10:00~12:00"
+                        ]);
+        //
+        //
+        //
+        // --- testDeleteAsAdmin --------------------------
+
+        $response = $this->actingAs($admin, 'admin')
+                        ->json('DELETE', '/admin/activity/19', [     # ここは id を直打ち
+                            'confirmation' => "hoge",
+                        ]);
+        $response = $this->actingAs($admin, 'admin')
+                        ->json('DELETE', '/admin/activity/99', [
+                            'confirmation' => "yakuin",
+                        ]);
+
+        $response = $this->actingAs($admin, 'admin')
+                        ->json('DELETE', '/admin/activity/19', [     # ここは id を直打ち
+                            'confirmation' => "yakuin",
+                        ]);
         //
         //
         //
