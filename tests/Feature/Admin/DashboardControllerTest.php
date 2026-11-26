@@ -76,6 +76,17 @@ class DashboardControllerTest extends TestCase
         $part_ids = DB::table('parts')->select('id')->orderBy('id')->get();
         $part_ids->prepend(0);  // 先頭に要素を追加（id と インデックスを同じにしたい）
 
+        // 日付の取得
+        $year = (int)date('Y');
+        $month = (int)date('m');
+        // var_dump($this->year);
+
+        // 3ヶ月前から8ヶ月後までの年と月を配列に格納
+        $this->ymlist = array();
+        for ($i = -3; $i <= 8; $i++) {
+            $this->ymlist[$i] = $this->shift_month($year, $month, $i);
+        }
+
 
 
         $admin = Admin::where('login_id', 'taro')->first();
@@ -244,6 +255,205 @@ class DashboardControllerTest extends TestCase
         //
         //
         //
+        // --- testDeleteAsAdmin --------------------------
+        //
+        $acts = $this->mk_activities();
+        // dd($acts[0]);
+        $response = $this->actingAs($admin, 'admin')
+                        ->json('POST', '/admin/activity', [
+                            'act_at' => $acts[0],
+                            'time' => null,
+                            'place' => $place_ids[1],
+                            'meeting' => "1",
+                            'note' => "選曲委員会 10:00~12:00"
+                        ]);
+        //
+        // 一部団員対象：活動内容を空で更新エラー
+        $response = $this->actingAs($admin, 'admin')
+                        ->json('PATCH', '/admin/activity', [
+                            'aid' => "22",
+                            'act_at' => $acts[0],
+                            'time' => null,
+                            'place' => $place_ids[1],
+                            'meeting' => "1",
+                            'note' => ""
+                        ]);
+        // 参加登録
+        // dd($user, $this->ymlist, $this->ymlist[0][0], $this->ymlist[0][1]);
+        $response = $this->actingAs($user)
+                        ->json('POST', '/dashboard', [
+                            'year' => $this->ymlist[0][0],
+                            'month' => $this->ymlist[0][1],
+                            'n_act' => "4",
+                            'part' => "1",
+                            'name' => "あい うえお",
+                            'act22' => "3",
+                            'comment22' => "あいうえおあいうえおあいうえおあいうえお",
+                            'act1' => "1",
+                            'comment1' => "おあいうえおおあいうえおおあ",
+                            'act2' => "3",
+                            'comment2' => "",
+                            'act3' => "0",
+                            'comment3' => "これもコメント JSON"
+                        ]);
+        //
+        $response = $this->actingAs($user)
+                        ->json('POST', '/dashboard', [
+                            'year' => $this->ymlist[0][0],
+                            'month' => $this->ymlist[0][1],
+                            'n_act' => "4",
+                            'part' => "3",
+                            'name' => "かき くけこ",
+                            'act22' => "1",
+                            'comment22' => "",
+                            'act1' => "0",
+                            'comment1' => "",
+                            'act2' => "0",
+                            'comment2' => "",
+                            'act3' => "0",
+                            'comment3' => ""
+                        ]);
+        //
+        $response = $this->actingAs($user)
+                        ->json('POST', '/dashboard', [
+                            'year' => $this->ymlist[0][0],
+                            'month' => $this->ymlist[0][1],
+                            'n_act' => "4",
+                            'part' => $part_ids[2],
+                            'name' => "さし すせそ",
+                            'act22' => "-1",
+                            'comment22' => "",
+                            'act1' => "0",
+                            'comment1' => "",
+                            'act2' => "1",
+                            'comment2' => "",
+                            'act3' => "1",
+                            'comment3' => ""
+                        ]);
+        //
+        $response = $this->actingAs($user)
+                        ->json('POST', '/dashboard', [
+                            'year' => $this->ymlist[0][0],
+                            'month' => $this->ymlist[0][1],
+                            'n_act' => "4",
+                            'part' => $part_ids[2],
+                            'name' => "たち つてと",
+                            'act22' => "-1",
+                            'comment22' => "",
+                            'act1' => "0",
+                            'comment1' => "",
+                            'act2' => "0",
+                            'comment2' => "",
+                            'act3' => "0",
+                            'comment3' => ""
+                        ]);
+        //
+        $response = $this->actingAs($user)
+                        ->json('POST', '/dashboard', [
+                            'year' => $this->ymlist[0][0],
+                            'month' => $this->ymlist[0][1],
+                            'n_act' => "4",
+                            'part' => $part_ids[3],
+                            'name' => "なにぬ ねの",
+                            'act22' => "1",
+                            'comment22' => "",
+                            'act1' => "1",
+                            'comment1' => "",
+                            'act2' => "1",
+                            'comment2' => "",
+                            'act3' => "1",
+                            'comment3' => ""
+                        ]);
+        //
+        $response = $this->actingAs($user)
+                        ->json('POST', '/dashboard', [
+                            'year' => $this->ymlist[0][0],
+                            'month' => $this->ymlist[0][1],
+                            'n_act' => "4",
+                            'part' => $part_ids[4],
+                            'name' => "はひ ふへほ",
+                            'act22' => "3",
+                            'comment22' => "はひふへおはひふへおはひふへおはひふへおはひふへおはひふへおはひふへおはひふへおはひふへおはひふへお",
+                            'act1' => "3",
+                            'comment1' => "はひふへおはひふへおはひふへおはひふへおはひふへおはひふへおはひふへおはひふへおはひふへおはひふへおはひふへおはひふへお",
+                            'act2' => "3",
+                            'comment2' => "はひふへお",
+                            'act3' => "3",
+                            'comment3' => "はひふへおはひふへおはひふへおはひふへおはひふへおはひふへおはひふへおはひふへお"
+                        ]);
+        //
+        $response = $this->actingAs($user)
+                        ->json('POST', '/dashboard', [
+                            'year' => $this->ymlist[0][0],
+                            'month' => $this->ymlist[0][1],
+                            'n_act' => "4",
+                            'part' => $part_ids[5],
+                            'name' => "まみ むめも",
+                            'act22' => "-1",
+                            'comment22' => "",
+                            'act1' => "3",
+                            'comment1' => "",
+                            'act2' => "3",
+                            'comment2' => "",
+                            'act3' => "3",
+                            'comment3' => ""
+                        ]);
+        //
+        $response = $this->actingAs($user)
+                        ->json('POST', '/dashboard', [
+                            'year' => $this->ymlist[0][0],
+                            'month' => $this->ymlist[0][1],
+                            'n_act' => "4",
+                            'part' => $part_ids[7],
+                            'name' => "やいゆ えよ",
+                            'act22' => "3",
+                            'comment22' => "",
+                            'act1' => "3",
+                            'comment1' => "",
+                            'act2' => "3",
+                            'comment2' => "",
+                            'act3' => "3",
+                            'comment3' => ""
+                        ]);
+        //
+        $response = $this->actingAs($user)
+                        ->json('POST', '/dashboard', [
+                            'year' => $this->ymlist[0][0],
+                            'month' => $this->ymlist[0][1],
+                            'n_act' => "4",
+                            'part' => $part_ids[8],
+                            'name' => "わおん",
+                            'act22' => "3",
+                            'comment22' => "",
+                            'act1' => "1",
+                            'comment1' => "",
+                            'act2' => "3",
+                            'comment2' => "",
+                            'act3' => "0",
+                            'comment3' => ""
+                        ]);
+        //
+        $response = $this->actingAs($user)
+                        ->json('PATCH', '/dashboard', [
+                            'year' => $this->ymlist[0][0],
+                            'month' => $this->ymlist[0][1],
+                            'n_act' => "4",
+                            'aid' => "15",
+                            'part' => $part_ids[1],
+                            'name' => "あい うえお",
+                            'atten15' => "-1",
+                            'comment15' => "メンバー外でしたあいうえおあいうえおあいうえおあいうえおおあいうえおおあいうえおおあいうえおおあいうえおおあいうえお",
+                            'atten12' => "0",
+                            'comment12' => "未定に変更おあいうえおおあいうえおおあいうえおおあいうえおおあいうえおおあいうえおおあいうえおおあいうえおおあいうえおおあいうえお あい",
+                            'atten13' => "3",
+                            'comment13' => "",
+                            'atten14' => "0",
+                            'comment14' => "これもコメント JSON add"
+                        ]);
+        //
+
+        //
+        //
         //
         //
         //
@@ -331,6 +541,39 @@ class DashboardControllerTest extends TestCase
             }
         }
         return $activities;
+    }
+
+
+    /**
+     *     月をずらす
+    *
+    *
+    **/
+    private function shift_month($year, $month, $shift = 0)
+    {
+        if ($shift == 0) {
+            return array($year, $month);
+        } elseif ($shift > 0) {  // 増やす
+            for ($i = 1; $i <= $shift; $i++) {
+                if ($month == 12) {
+                    $year++;
+                    $month = 1;
+                } else {
+                    $month++;
+                }
+            }
+            return array($year, $month);
+        } else { // 減らす
+            for ($i = -1; $i >= $shift; $i--) {
+                if ($month == 1) {
+                    $year--;
+                    $month = 12;
+                } else {
+                    $month--;
+                }
+            }
+            return array($year, $month);
+        }
     }
 
 }
