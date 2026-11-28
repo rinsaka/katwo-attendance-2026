@@ -25,6 +25,7 @@ use Database\Seeders\AttendancesTableSeeder;
 
 class DashboardControllerTest extends TestCase
 {
+    use RefreshDatabase;
     /**
      * A basic feature test example.
      */
