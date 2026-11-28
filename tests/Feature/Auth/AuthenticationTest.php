@@ -43,7 +43,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->post('/login', [
-            'email' => $user->email,
+            'login_id' => $user->login_id,
             'password' => 'wrong-password',
         ]);
 
