@@ -88,8 +88,8 @@ class DashboardController extends Controller
     {
         // URL の Validation
         if ($year > 2080 || $year < 2017 || $month < 1 || $month > 12) {
-            return redirect('/home/')->with('error', "不正なURLです！");
-        } // まだ home/2018/11.2/ のような場合も動いてしまう．この後 (int) でキャストしているので問題なし．
+            return redirect('/dashboard/')->with('error', "不正なURLです！");
+        } // まだ dashboard/2018/11.2/ のような場合も動いてしまう．この後 (int) でキャストしているので問題なし．
 
         $thismonth_head = date("Y-m-01", mktime(0,0,0,$month,1,$year));
         $thismonth_tail = date("Y-m-t", mktime(0,0,0,$month,1,$year));
@@ -299,7 +299,7 @@ class DashboardController extends Controller
                                     ->orderBy('meeting', 'DESC')
                                     ->get();
         // if (count($attendances)==0) {
-        //     return redirect('/home/'.$year.'/'.$month)->with('error', "不正なURLです");
+        //     return redirect('/dashboard/'.$year.'/'.$month)->with('error', "不正なURLです");
         // }
 
         foreach ($attendances as $attendance) {
