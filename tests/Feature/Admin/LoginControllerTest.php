@@ -35,20 +35,24 @@ class LoginControllerTest extends TestCase
                             ->assertSee('Admin Login')
                             ->assertSee('Password');
         //
-        $this->json('POST', '/admin/login', [
+        // ログイン成功
+        $response = $this->json('POST', '/admin/login', [
                     'login_id' => $admin->login_id,
                     'password' => 'admin'
                 ]);
+        $response->assertRedirect('/admin/dashboard');
         //
-        //
-        $this->json('POST', '/admin/login', [
+        // パスワードが異なる -> ステータスコード 422 になる
+        $response = $this->json('POST', '/admin/login', [
                     'login_id' => $admin->login_id,
                     'password' => 'Wrong Password'
                 ]);
+        $response->assertStatus(422);
         //
         //
-        $this->actingAs($admin, 'admin')  // ガードを変更
+        $response = $this->actingAs($admin, 'admin')  // ガードを変更
             ->json('POST', '/admin/logout', []);
+        $response->assertRedirect('/');
         //
         //
     }
