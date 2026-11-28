@@ -29,7 +29,9 @@ class LoginControllerTest extends TestCase
     {
         $this->seed(AdminsTableSeeder::class);
 
-        $admin = Admin::where('login_id', 'taro')->first();
+        // $admin = Admin::where('login_id', 'taro')->first();
+        $admin = Admin::first();
+        // dd($admin);
 
         $this->get('/admin/login/')
                             ->assertSee('Admin Login')
