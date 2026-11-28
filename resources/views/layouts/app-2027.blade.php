@@ -109,13 +109,13 @@
 
 <footer class="text-bg-secondary p-4 mt-auto">
     @if (Auth::guard('web')->user())
-        @if (\Config::get('const.SAMPLE_URL'))
+        {{-- @if (\Config::get('const.SAMPLE_URL'))
             <p>
                 <a href="{{ \Config::get('const.SAMPLE_URL') }}" class="text-bg-secondary">
                     {{ \Config::get('const.SAMPLE_MSG') }}
                 </a>
             </p>
-        @endif
+        @endif --}}
         <div class="text-end">
             <a href="{{ route('mail_footer') }}" class="text-bg-secondary">
                 メールフッタ
