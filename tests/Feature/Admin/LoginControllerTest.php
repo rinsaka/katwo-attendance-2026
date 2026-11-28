@@ -18,20 +18,12 @@ class LoginControllerTest extends TestCase
     /**
      * A basic feature test example.
      */
-    public function test_example(): void
-    {
-        $response = $this->get('/');
-
-        $response->assertStatus(200);
-    }
 
     public function test_admin_login_with_seed(): void
     {
         $this->seed(AdminsTableSeeder::class);
 
-        // $admin = Admin::where('login_id', 'taro')->first();
         $admin = Admin::first();
-        // dd($admin);
 
         $this->get('/admin/login/')
                             ->assertSee('Admin Login')
