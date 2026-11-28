@@ -49,7 +49,7 @@ class LoginControllerTest extends TestCase
                 ]);
         $response->assertStatus(422);
         //
-        //
+        // ログアウト
         $response = $this->actingAs($admin, 'admin')  // ガードを変更
             ->json('POST', '/admin/logout', []);
         $response->assertRedirect('/');
