@@ -23,6 +23,7 @@ use Database\Seeders\PartsTableSeeder;
 use Database\Seeders\ActivitiesTableSeeder;
 use Database\Seeders\AttendancesTableSeeder;
 use Database\Seeders\MenusTableSeeder;
+use Database\Seeders\MailinfosTableSeeder;
 
 class MenuControllerTest extends TestCase
 {
@@ -47,6 +48,7 @@ class MenuControllerTest extends TestCase
         $this->seed(ActivitiesTableSeeder::class);
         $this->seed(AttendancesTableSeeder::class);
         $this->seed(MenusTableSeeder::class);
+        $this->seed(MailinfosTableSeeder::class);
 
         $time_ids = DB::table('times')->select('id')->orderBy('id')->get();
         $time_ids->prepend(0);  // 先頭に要素を追加（id と インデックスを同じにしたい）
@@ -150,12 +152,18 @@ class MenuControllerTest extends TestCase
                             'menu' => "ブラームス"
                         ]);
         //
+        // // メニューのメール文面
+        // $response = $this->actingAs($user)
+        //                 ->get('/menu/1/mail')
+        //                 ->assertSee('案内メール文面');
+        //                 // ->assertSee('の練習予定をお知らせします')
+        //                 // ->assertSee('じゅげむ');
+        //
         //
         // $today = Carbon::now()->format('Y-m-d');
         // $tomorrow = Carbon::tomorrow()->format('Y-m-d');
         // $dec12 = Carbon::now()->format('Y') . '-12-12'; // 12月12日
 
-        //
         //
         //
         //

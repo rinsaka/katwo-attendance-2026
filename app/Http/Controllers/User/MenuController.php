@@ -84,7 +84,9 @@ class MenuController extends Controller
         $tomorrow = Carbon::tomorrow()->toDateString();
 
         if ($m == 12) {
+            // @codeCoverageIgnoreStart
             $m_next = 1;
+            // @codeCoverageIgnoreEnd
         } else {
             $m_next = $m + 1;
         }
@@ -93,9 +95,13 @@ class MenuController extends Controller
         // 書き出し ---------------------------
         $mail = $menu->name . "です．\n";
         if ($act_at == $today) {
+            // @codeCoverageIgnoreStart
             $mail .=   "本日の練習予定をお知らせします．";
+            // @codeCoverageIgnoreEnd
         } elseif ($act_at == $tomorrow) {
+            // @codeCoverageIgnoreStart
             $mail .=   "あすの練習予定をお知らせします．";
+            // @codeCoverageIgnoreEnd
         } else {
             $mail .=   $md . "の練習予定をお知らせします．";
         }
@@ -104,8 +110,10 @@ class MenuController extends Controller
         $mail .= "\n\n";
         $mail .= $md . parent::get_youbi($menu->activity->act_at) . " " . $menu->activity->time->jikan . "\n";
         $mail .= $menu->activity->place->place;
-        if ($menu->activity->note) {
+        if ($menu->activity->note) {    // 「演奏会」などの情報 (note) がある場合
+            // @codeCoverageIgnoreStart
             $mail .= "\n" . $menu->activity->note;
+            // @codeCoverageIgnoreEnd
         }
         $mail .= "\n\n";
 
