@@ -4,51 +4,32 @@ namespace Tests\Feature\Admin;
 
 use Illuminate\Support\Facades\DB;
 
-
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 use App\Models\User;
 use App\Models\Admin;
-// use App\Models\Time;
-// use App\Models\Place;
-// use App\Models\Part;
-// use App\Models\Activity;
 
 use Database\Seeders\UsersTableSeeder;
 use Database\Seeders\AdminsTableSeeder;
-// use Database\Seeders\PlacesTableSeeder;
-// use Database\Seeders\TimesTableSeeder;
-// use Database\Seeders\PartsTableSeeder;
-// use Database\Seeders\ActivitiesTableSeeder;
 
 class PasswordControllerTest extends TestCase
 {
     use RefreshDatabase;
-    /**
-     * A basic feature test example.
-     */
-    public function test_example(): void
-    {
-        $response = $this->get('/');
-
-        $response->assertStatus(200);
-    }
 
     public function test_admin_password_with_seed(): void
     {
         /*
-        * 次のユーザについてパスワードを変更する
-        *   user -> user_b
-        *   admin -> jiro
-        */
+         *    管理者とユーザについてパスワードを変更する
+         */
 
         $this->seed(UsersTableSeeder::class);
         $this->seed(AdminsTableSeeder::class);
 
-        $admin = Admin::where('login_id', 'jiro')->first();
-        $user = User::where('login_id', 'user_b')->first();
+
+        $admin = Admin::first();
+        $user = User::first();
 
         // 団員パスワード変更ページ
         $response = $this->actingAs($admin, 'admin')
@@ -63,7 +44,7 @@ class PasswordControllerTest extends TestCase
                         ->json('PATCH', '/admin/userpassword', [
                             'id' => $user->id,
                             'password' => "abc",
-                            'login_id' => "user_b",
+                            'login_id' => $user->login_id,
                             'new_password' => "12345678",
                             'new_password_confirm' => "12345678",
                         ]);
@@ -73,7 +54,7 @@ class PasswordControllerTest extends TestCase
                         ->json('PATCH', '/admin/userpassword', [
                             'id' => $user->id,
                             'password' => env('ADMIN_PASSWORD'),
-                            'login_id' => "user_b",
+                            'login_id' => $user->login_id,
                             'new_password' => "1234567",
                             'new_password_confirm' => "1234567890",
                         ]);
@@ -93,7 +74,7 @@ class PasswordControllerTest extends TestCase
                         ->json('PATCH', '/admin/userpassword', [
                             'id' => $user->id,
                             'password' => env('ADMIN_PASSWORD'),
-                            'login_id' => "user_b",
+                            'login_id' => $user->login_id,
                             'new_password' => "12345678",
                             'new_password_confirm' => "12345678",
                         ]);
@@ -154,13 +135,5 @@ class PasswordControllerTest extends TestCase
                             'new_password_confirm' => "12345678",
                         ]);
         //
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-
     }
 }
