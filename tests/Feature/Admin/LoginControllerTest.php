@@ -50,4 +50,50 @@ class LoginControllerTest extends TestCase
         //
         //
     }
+
+    public function test_admin_too_many_login_attempts_with_seed(): void
+    {
+        $this->seed(AdminsTableSeeder::class);
+
+        $admin = Admin::first();
+
+        // パスワードが異なる
+        $response = $this->json('POST', '/admin/login', [
+                    'login_id' => $admin->login_id,
+                    'password' => 'Wrong Password'
+        ]);
+
+        // パスワードが異なる
+        $response = $this->json('POST', '/admin/login', [
+                    'login_id' => $admin->login_id,
+                    'password' => 'Wrong Password'
+        ]);
+
+        // パスワードが異なる
+        $response = $this->json('POST', '/admin/login', [
+                    'login_id' => $admin->login_id,
+                    'password' => 'Wrong Password'
+        ]);
+
+        // パスワードが異なる
+        $response = $this->json('POST', '/admin/login', [
+                    'login_id' => $admin->login_id,
+                    'password' => 'Wrong Password'
+        ]);
+        
+        // パスワードが異なる
+        $response = $this->json('POST', '/admin/login', [
+                    'login_id' => $admin->login_id,
+                    'password' => 'Wrong Password'
+        ]);
+
+        // パスワードが異なる
+        $response = $this->json('POST', '/admin/login', [
+                    'login_id' => $admin->login_id,
+                    'password' => 'Wrong Password'
+        ]);
+
+        $response->assertSee('Too many login attempts');
+        //
+    }
 }

@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+use Database\Seeders\UsersTableSeeder;
+
 class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
@@ -62,5 +64,50 @@ class AuthenticationTest extends TestCase
 
         $this->assertGuest();
         $response->assertRedirect('/');
+    }
+
+    public function test_users_too_many_login_attempts(): void
+    {
+        $this->seed(UsersTableSeeder::class);
+
+        $user = User::first();
+
+        $response = $this->json('POST', '/login', [
+                    'login_id' => $user->login_id,
+                    'password' => 'Wrong Password'
+        ]);
+
+        $response = $this->json('POST', '/login', [
+                    'login_id' => $user->login_id,
+                    'password' => 'Wrong Password'
+        ]);
+
+        $response = $this->json('POST', '/login', [
+                    'login_id' => $user->login_id,
+                    'password' => 'Wrong Password'
+        ]);
+
+        $response = $this->json('POST', '/login', [
+                    'login_id' => $user->login_id,
+                    'password' => 'Wrong Password'
+        ]);
+
+        $response = $this->json('POST', '/login', [
+                    'login_id' => $user->login_id,
+                    'password' => 'Wrong Password'
+        ]);
+
+        $response = $this->json('POST', '/login', [
+                    'login_id' => $user->login_id,
+                    'password' => 'Wrong Password'
+        ]);
+
+        $response = $this->json('POST', '/login', [
+                    'login_id' => $user->login_id,
+                    'password' => 'Wrong Password'
+        ]);
+
+        $response->assertSee('Too many login attempts');
+
     }
 }
