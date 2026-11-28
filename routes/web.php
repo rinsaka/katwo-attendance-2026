@@ -39,5 +39,20 @@ Route::middleware('auth', 'verified')->group(function () {
 
 });
 
+/*
+|--------------------------------------------------------------------------
+| 旧URL対応
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('home')->group(function () {
+
+    Route::get('{any?}', function () {
+        return redirect()->route('dashboard');
+    })->where('any', '.*');
+
+});
+
+
 require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';

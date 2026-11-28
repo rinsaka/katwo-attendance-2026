@@ -378,6 +378,27 @@ class DashboardControllerTest extends TestCase
         //
         //
 
+        /*
+        |--------------------------------------------------------------------------
+        | 旧URL対応
+        |    /home を /dashborad に変更したので転送させる
+        |--------------------------------------------------------------------------
+        */
+
+        $urls = [
+            '/home',
+            '/home/2026',
+            '/home/2026/10',
+            '/home/2026/10/6/edit',
+        ];
+
+        foreach ($urls as $url) {
+            $this->actingAs($user)
+                ->get($url)
+                ->assertRedirect(route('dashboard'));
+        }
+
+
     }
 
     /**
