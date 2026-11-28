@@ -18,11 +18,11 @@ class Activity extends Model
         return $this->belongsTo('App\Models\Time')->withDefault();
     }
 
-    // One to Many の One 側
-    public function attendances()
-    {
-        return $this->hasMany('App\Models\Attendance');
-    }
+    // // One to Many の One 側
+    // public function attendances()
+    // {
+    //     return $this->hasMany('App\Models\Attendance');
+    // }
 
     // One to One
     public function Menu()
