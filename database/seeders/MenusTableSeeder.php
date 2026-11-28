@@ -27,8 +27,8 @@ class MenusTableSeeder extends Seeder
             'activity_id' => 1,
             'name' => 'たろー',
             'menu' => "19時から 合奏\nピアノコンチェルト\n交響曲第1番",
-            'created_at' => Carbon::create($prev_year, $prev_month, 20, 18, 0, 0),
-            'updated_at' => Carbon::create($prev_year, $prev_month, 20, 18, 10, 0)
+            'created_at' => Carbon::yesterday(),
+            'updated_at' => Carbon::now()
         ]);
 
         DB::table('menus')->insert([
@@ -43,8 +43,8 @@ class MenusTableSeeder extends Seeder
             'activity_id' => 3,
             'name' => 'じろー',
             'menu' => "19時から 合奏\n交響曲第3番",
-            'created_at' => Carbon::create($prev_year, $prev_month, 23, 20, 0, 0),
-            'updated_at' => Carbon::create($prev_year, $prev_month, 23, 20, 0, 0)
+            'created_at' => Carbon::yesterday(),
+            'updated_at' => Carbon::yesterday()
         ]);
 
         DB::table('menus')->insert([

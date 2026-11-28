@@ -21,7 +21,9 @@ use Database\Seeders\PlacesTableSeeder;
 use Database\Seeders\TimesTableSeeder;
 use Database\Seeders\PartsTableSeeder;
 use Database\Seeders\ActivitiesTableSeeder;
+use Database\Seeders\MenusTableSeeder;
 use Database\Seeders\AttendancesTableSeeder;
+use Database\Seeders\MailinfosTableSeeder;
 
 class DashboardControllerTest extends TestCase
 {
@@ -44,7 +46,9 @@ class DashboardControllerTest extends TestCase
         $this->seed(TimesTableSeeder::class);
         $this->seed(PartsTableSeeder::class);
         $this->seed(ActivitiesTableSeeder::class);
+        $this->seed(MenusTableSeeder::class);
         $this->seed(AttendancesTableSeeder::class);
+        $this->seed(MailinfosTableSeeder::class);
 
         $time_ids = DB::table('times')->select('id')->orderBy('id')->get();
         $time_ids->prepend(0);  // 先頭に要素を追加（id と インデックスを同じにしたい）
@@ -140,16 +144,16 @@ class DashboardControllerTest extends TestCase
                         ->assertRedirect('/dashboard/');
 
         //
-        // $response = $this->actingAs($user)
-        //                 ->get('/dashboard/mail')
-        //                 // ->assertSee('メールのフッタ')
-        //                 ->assertSee('戻る');
+        $response = $this->actingAs($user)
+                        ->get('/dashboard/mail')
+                        ->assertSee('メールのフッタ')
+                        ->assertSee('戻る');
         // //
         //
         //
         // --- testCreateAsUser-----------------
         //
-        //
+        // 登録成功
         $response = $this->actingAs($user)
                         ->json('POST', '/dashboard', [
                             'year' => $this->ymlist[1][0],
@@ -166,7 +170,9 @@ class DashboardControllerTest extends TestCase
                             'act7' => "3",
                             'comment7' => "JSON JSON"
                         ]);
+        $response->assertRedirect('/dashboard/'. $this->ymlist[1][0] . '/'. $this->ymlist[1][1]);
         //
+        // 名前が重複
         $response = $this->actingAs($user)
                         ->json('POST', '/dashboard', [
                             'year' => $this->ymlist[1][0],
@@ -183,8 +189,9 @@ class DashboardControllerTest extends TestCase
                             'act7' => "3",
                             'comment7' => "JSON JSON"
                         ]);
+        $response->assertRedirect('/dashboard/'. $this->ymlist[1][0] . '/'. $this->ymlist[1][1] . '/create'); // 名前が重複
         //
-        //
+        // パート未選択
         $response = $this->actingAs($user)
                         ->json('POST', '/dashboard', [
                             'year' => $this->ymlist[1][0],
@@ -201,6 +208,7 @@ class DashboardControllerTest extends TestCase
                             'act7' => "3",
                             'comment7' => "JSON JSON"
                         ]);
+        $response->assertStatus(422); // パート未選択
         //
         //
         $response = $this->actingAs($user)
@@ -219,6 +227,7 @@ class DashboardControllerTest extends TestCase
                             'act7' => "3",
                             'comment7' => "JSON JSON"
                         ]);
+        $response->assertStatus(422); // 名前が長い
         //
         //
         $response = $this->actingAs($user)
@@ -237,6 +246,7 @@ class DashboardControllerTest extends TestCase
                             'act7' => "3",
                             'comment7' => "JSON JSON"
                         ]);
+        $response->assertStatus(422); // コメントが長い
         //
         //
         // --- testShowNewAsUser -----------------
@@ -296,6 +306,7 @@ class DashboardControllerTest extends TestCase
                             'atten12' => "3",
                             'comment7' => "JSON JSON"
                         ]);
+        $response->assertRedirect('/dashboard/' . $this->ymlist[1][0] . '/' . $this->ymlist[1][1]);
         //
         //
         //
@@ -330,38 +341,52 @@ class DashboardControllerTest extends TestCase
                             'act7' => "3",
                             'comment7' => "これ失敗"
                         ]);
+        $response->assertRedirect('/dashboard/' . $this->ymlist[1][0] . '/' . $this->ymlist[1][1]);
         //
+        // 上で登録した4つの出席データのIDを取得
+        $attens = DB::table('attendances')->orderBy('id', 'DESC')->limit(4)->get();
+        $delete_ids = [];
+        foreach($attens as $atten) {
+            $delete_ids[] = $atten->id;
+        }
+        //
+        // 削除確認画面
         $response = $this->actingAs($user)
                         ->json('POST', '/dashboard/confirm_delete', [
                             'year' => $this->ymlist[1][0],
                             'month' => $this->ymlist[1][1],
                             'name' => "サブロー",
-                            'aid' => "52",
-                            'attens' => array(52, 53, 54, 55),
+                            'aid' => $delete_ids[3],
+                            'attens' => $delete_ids
                         ]);
+        $response->assertSee('サブロー')
+                    ->assertSee('確認用');
         //
-        //
+        // 削除エラー
         $response = $this->actingAs($user)
                         ->json('DELETE', '/dashboard', [
                             'year' => $this->ymlist[1][0],
                             'month' => $this->ymlist[1][1],
                             'name' => "サブロー",
-                            'aid' => "52",
-                            'attens' => array(52, 53, 54, 55),
+                            'aid' => $delete_ids[3],
+                            'attens' => $delete_ids,
                             'delete_token' => "katwo",
                             'confirmation' => "hoge"  // 文字列が異なるので削除エラー
                         ]);
+        $response->assertRedirect('/dashboard/' . $this->ymlist[1][0] . '/' . $this->ymlist[1][1] . '/' . $delete_ids[3] . '/edit');
         //
+        // 削除成功
         $response = $this->actingAs($user)
                         ->json('DELETE', '/dashboard', [
                             'year' => $this->ymlist[1][0],
                             'month' => $this->ymlist[1][1],
                             'name' => "サブロー",
-                            'aid' => "52",
-                            'attens' => array(52, 53, 54, 55),
+                            'aid' => $delete_ids[3],
+                            'attens' => $delete_ids,
                             'delete_token' => "katwo",
                             'confirmation' => "katwo"
                         ]);
+        $response->assertRedirect('/dashboard/' . $this->ymlist[1][0] . '/' . $this->ymlist[1][1]);
         //
         //
         //
