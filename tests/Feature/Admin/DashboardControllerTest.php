@@ -10,10 +10,6 @@ use Tests\TestCase;
 
 use App\Models\User;
 use App\Models\Admin;
-// use App\Models\Time;
-// use App\Models\Place;
-// use App\Models\Part;
-// use App\Models\Activity;
 
 use Database\Seeders\UsersTableSeeder;
 use Database\Seeders\AdminsTableSeeder;
@@ -21,6 +17,7 @@ use Database\Seeders\PlacesTableSeeder;
 use Database\Seeders\TimesTableSeeder;
 use Database\Seeders\PartsTableSeeder;
 use Database\Seeders\ActivitiesTableSeeder;
+use Database\Seeders\AttendancesTableSeeder;
 
 class DashboardControllerTest extends TestCase
 {
@@ -34,6 +31,7 @@ class DashboardControllerTest extends TestCase
         $this->seed(TimesTableSeeder::class);
         $this->seed(PartsTableSeeder::class);
         $this->seed(ActivitiesTableSeeder::class);
+        $this->seed(AttendancesTableSeeder::class);
 
         $time_ids = DB::table('times')->select('id')->orderBy('id')->get();
         $time_ids->prepend(0);  // 先頭に要素を追加（id と インデックスを同じにしたい）
@@ -73,27 +71,33 @@ class DashboardControllerTest extends TestCase
                         ->get('/admin/activity/99a')
                         ->assertRedirect('/admin/dashboard');
 
-        // --- testEditAsAdmin --------------------------
+        // ---  --------------------------
 
         $acts = $this->mk_activities();
         list($year, $month, $day) = explode('-', $acts[15]);
         $day = sprintf("%d",(int)$day + 1);
         $new_day = "$year-$month-$day"; // 1日進める
 
+
+        // $activities = DB::table('activities')->orderBy('act_at')->get();
+        // dd($activities, $acts);
         // dd($time_ids, $place_ids, $acts);
+
+        // dd($time_ids, $place_ids);
 
         $response = $this->actingAs($admin, 'admin')
                         ->json('PATCH', '/admin/activity', [
+                            'aid' => $activity_ids[16]->id,
                             'act_at' => $new_day,
-                            'time' => $time_ids[1],
-                            'place' => $place_ids[1],
+                            'time' => $time_ids[1]->id,
+                            'place' => $place_ids[1]->id,
                             'note' => "土曜日から日曜日に変更しました",
                         ]);
         //
         //
         $response = $this->actingAs($admin, 'admin')
                         ->json('PATCH', '/admin/activity', [
-                            'aid' => $activity_ids[16],
+                            'aid' => $activity_ids[16]->id,
                             'act_at' => $new_day,
                             'time' => $time_ids[0],
                             'place' => $place_ids[0],
@@ -103,26 +107,48 @@ class DashboardControllerTest extends TestCase
         //
         $response = $this->actingAs($admin, 'admin')
                         ->json('PATCH', '/admin/activity', [
-                            'aid' => $activity_ids[16],
+                            'aid' => "99a",
                             'act_at' => $new_day,
-                            'time' => $time_ids[1],
-                            'place' => $place_ids[1],
+                            'time' => $time_ids[0],
+                            'place' => $place_ids[0],
+                            'note' => "エラー",
+                        ]);
+        $response->assertRedirect('/admin/dashboard');
+        //
+        //
+        $response = $this->actingAs($admin, 'admin')
+                        ->json('PATCH', '/admin/activity', [
+                            'aid' => $activity_ids[16]->id,
+                            'act_at' => $new_day,
+                            'time' => $time_ids[1]->id,
+                            'place' => $place_ids[1]->id,
                             'note' => "土曜日から日曜日に変更しました",
                         ]);
-
         //
         //
-        $url = sprintf("/admin/activity/%d", $activity_ids[1]->id);
         $response = $this->actingAs($admin, 'admin')
-                        ->get($url)
+                        ->get("/admin/activity/" . $activity_ids[1]->id)
                         ->assertSee('活動予定の表示と編集')
                         ->assertSee('日にち')
                         ->assertSee('活動予定を変更')
                         ->assertSee('管理者');
-
         //
         //
-        // --- testEditAsAdmin --------------------------
+        // 一部団員用の活動なので note の空白は許可されない
+        $response = $this->actingAs($admin, 'admin')
+                        ->json('PATCH', '/admin/activity', [
+                            'aid' => $activity_ids[7]->id,
+                            'act_at' => $new_day,
+                            'time' => $time_ids[1]->id,
+                            'meeting' => "1",
+                            'place' => $place_ids[1]->id,
+                            'note' => "",
+                        ]);
+        //
+        $response->assertStatus(302);
+        //
+        //
+        // ---  --------------------------
         //
         //
         //
@@ -137,9 +163,9 @@ class DashboardControllerTest extends TestCase
         // 4ヶ月先の4回目の練習を追加する
         $response = $this->actingAs($admin, 'admin')
                         ->json('POST', '/admin/activity', [
-                            'act_at' => $acts[16],
-                            'time' => $time_ids[4],
-                            'place' => $place_ids[6],
+                            'act_at' => $acts[17],
+                            'time' => $time_ids[4]->id,
+                            'place' => $place_ids[6]->id,
                             'note' => "練習日程を追加しました"
                         ]);
 
@@ -148,7 +174,7 @@ class DashboardControllerTest extends TestCase
         // 7ヶ月先の予定(2回)を順次追加 --> まず1回め
         $response = $this->actingAs($admin, 'admin')
                         ->json('POST', '/admin/activity', [
-                            'act_at' => $acts[18],
+                            'act_at' => $acts[19],
                             'time' => $time_ids[0],
                             'place' => $place_ids[0],
                             'note' => "練習日程を追加しました"
@@ -158,16 +184,16 @@ class DashboardControllerTest extends TestCase
         // 活動形態の指定でエラー
         $response = $this->actingAs($admin, 'admin')
                         ->json('POST', '/admin/activity', [
-                            'act_at' => $acts[18],
+                            'act_at' => $acts[19],
                             'time' => "",
-                            'place' => $place_ids[1],
+                            'place' => $place_ids[1]->id,
                             'meeting' => "1",
                             'note' => ""
                         ]);
         //
         //
         //
-        // --- testEditAsUser --------------------------
+        // ---  --------------------------
         //
         //
         // ユーザで出席登録
@@ -177,55 +203,71 @@ class DashboardControllerTest extends TestCase
                             'year' => $year,
                             'month' => $month,
                             'n_act' => "1",
-                            'part' => $part_ids[9],
+                            'part' => $part_ids[9]->id,
                             'name' => "天然記念物",
                             'act19' => "3",
                             'comment19' => "参加します．このあと，スケジュールが追加されます"
                         ]);
         //
         //
-        // --- testCreateAsAdmin2 --------------------------
+        // ---  --------------------------
+        //
+        // 2ヶ月先の予定(4回目)を追加
+        $response = $this->actingAs($admin, 'admin')
+                        ->json('POST', '/admin/activity', [
+                            'act_at' => $acts[10],
+                            'time' => $time_ids[1]->id,
+                            'place' => $place_ids[1]->id,
+                            'note' => "追加された日程です。出欠情報が自動的に生成されます。"
+                        ]);
+        $response->assertRedirect('/admin/dashboard');
+        //
+        // $activities = DB::table('activities')->orderBy('act_at')->get();
+        // dd($activities, $acts, $time_ids, $place_ids);
+        //
+        //
+        // ---  --------------------------
         //
         // 7ヶ月先の予定(2回目)を追加
         $response = $this->actingAs($admin, 'admin')
                         ->json('POST', '/admin/activity', [
-                            'act_at' => $acts[19],
-                            'time' => $time_ids[1],
-                            'place' => $place_ids[1],
+                            'act_at' => $acts[20],
+                            'time' => $time_ids[1]->id,
+                            'place' => $place_ids[1]->id,
                             'note' => "さらに追加された日程です"
                         ]);
         //
         // 7ヶ月先の予定(3回目：選曲委員会)をさらに追加
         $response = $this->actingAs($admin, 'admin')
                         ->json('POST', '/admin/activity', [
-                            'act_at' => $acts[19],
+                            'act_at' => $acts[20],
                             'time' => null,
-                            'place' => $place_ids[2],
+                            'place' => $place_ids[2]->id,
                             'note' => "選曲委員会 10:00~12:00"
                         ]);
         //
         //
         //
-        // --- testDeleteAsAdmin --------------------------
+        // ---  --------------------------
 
         $response = $this->actingAs($admin, 'admin')
-                        ->json('DELETE', '/admin/activity/19', [     # ここは id を直打ち
+                        ->json('DELETE', '/admin/activity/20', [     # ここは id を直打ち
                             'confirmation' => "hoge",
                         ]);
         $response = $this->actingAs($admin, 'admin')
-                        ->json('DELETE', '/admin/activity/99', [
+                        ->json('DELETE', '/admin/activity/99a', [
                             'confirmation' => "yakuin",
                         ]);
 
         $response = $this->actingAs($admin, 'admin')
-                        ->json('DELETE', '/admin/activity/19', [     # ここは id を直打ち
+                        ->json('DELETE', '/admin/activity/20', [     # ここは id を直打ち
                             'confirmation' => "yakuin",
                         ]);
         //
         //
         //
         //
-        // --- testDeleteAsAdmin --------------------------
+        // ---  --------------------------
         //
         $acts = $this->mk_activities();
         // dd($acts[0]);
@@ -233,7 +275,7 @@ class DashboardControllerTest extends TestCase
                         ->json('POST', '/admin/activity', [
                             'act_at' => $acts[0],
                             'time' => null,
-                            'place' => $place_ids[1],
+                            'place' => $place_ids[1]->id,
                             'meeting' => "1",
                             'note' => "選曲委員会 10:00~12:00"
                         ]);
@@ -244,7 +286,7 @@ class DashboardControllerTest extends TestCase
                             'aid' => "22",
                             'act_at' => $acts[0],
                             'time' => null,
-                            'place' => $place_ids[1],
+                            'place' => $place_ids[1]->id,
                             'meeting' => "1",
                             'note' => ""
                         ]);
@@ -289,7 +331,7 @@ class DashboardControllerTest extends TestCase
                             'year' => $this->ymlist[0][0],
                             'month' => $this->ymlist[0][1],
                             'n_act' => "4",
-                            'part' => $part_ids[2],
+                            'part' => $part_ids[2]->id,
                             'name' => "さし すせそ",
                             'act22' => "-1",
                             'comment22' => "",
@@ -306,7 +348,7 @@ class DashboardControllerTest extends TestCase
                             'year' => $this->ymlist[0][0],
                             'month' => $this->ymlist[0][1],
                             'n_act' => "4",
-                            'part' => $part_ids[2],
+                            'part' => $part_ids[2]->id,
                             'name' => "たち つてと",
                             'act22' => "-1",
                             'comment22' => "",
@@ -323,7 +365,7 @@ class DashboardControllerTest extends TestCase
                             'year' => $this->ymlist[0][0],
                             'month' => $this->ymlist[0][1],
                             'n_act' => "4",
-                            'part' => $part_ids[3],
+                            'part' => $part_ids[3]->id,
                             'name' => "なにぬ ねの",
                             'act22' => "1",
                             'comment22' => "",
@@ -340,7 +382,7 @@ class DashboardControllerTest extends TestCase
                             'year' => $this->ymlist[0][0],
                             'month' => $this->ymlist[0][1],
                             'n_act' => "4",
-                            'part' => $part_ids[4],
+                            'part' => $part_ids[4]->id,
                             'name' => "はひ ふへほ",
                             'act22' => "3",
                             'comment22' => "はひふへおはひふへおはひふへおはひふへおはひふへおはひふへおはひふへおはひふへおはひふへおはひふへお",
@@ -357,7 +399,7 @@ class DashboardControllerTest extends TestCase
                             'year' => $this->ymlist[0][0],
                             'month' => $this->ymlist[0][1],
                             'n_act' => "4",
-                            'part' => $part_ids[5],
+                            'part' => $part_ids[5]->id,
                             'name' => "まみ むめも",
                             'act22' => "-1",
                             'comment22' => "",
@@ -374,7 +416,7 @@ class DashboardControllerTest extends TestCase
                             'year' => $this->ymlist[0][0],
                             'month' => $this->ymlist[0][1],
                             'n_act' => "4",
-                            'part' => $part_ids[7],
+                            'part' => $part_ids[7]->id,
                             'name' => "やいゆ えよ",
                             'act22' => "3",
                             'comment22' => "",
@@ -391,7 +433,7 @@ class DashboardControllerTest extends TestCase
                             'year' => $this->ymlist[0][0],
                             'month' => $this->ymlist[0][1],
                             'n_act' => "4",
-                            'part' => $part_ids[8],
+                            'part' => $part_ids[8]->id,
                             'name' => "わおん",
                             'act22' => "3",
                             'comment22' => "",
@@ -409,7 +451,7 @@ class DashboardControllerTest extends TestCase
                             'month' => $this->ymlist[0][1],
                             'n_act' => "4",
                             'aid' => "15",
-                            'part' => $part_ids[1],
+                            'part' => $part_ids[1]->id,
                             'name' => "あい うえお",
                             'atten15' => "-1",
                             'comment15' => "メンバー外でしたあいうえおあいうえおあいうえおあいうえおおあいうえおおあいうえおおあいうえおおあいうえおおあいうえお",
@@ -421,7 +463,8 @@ class DashboardControllerTest extends TestCase
                             'comment14' => "これもコメント JSON add"
                         ]);
         //
-
+        // $activities = DB::table('activities')->orderBy('act_at')->get();
+        // dd($activities);
         //
         //
         //
@@ -440,7 +483,7 @@ class DashboardControllerTest extends TestCase
      *    活動の一覧を作成する
     *       今月 3回
     *       翌月 4回（4回目運営会議）
-    *       翌々月 3回（3回目総会）
+    *       翌々月 3回（3回目総会） + 追加で1回 （テストで1つ追加するのでシーダの内容と異なる）
     *       3ヶ月先 3回
     *       4ヶ月先 4回    （テストで1つ追加するのでシーダの内容と異なる）
     *       6ヶ月先 1回（本番）
@@ -450,7 +493,7 @@ class DashboardControllerTest extends TestCase
         $act_list = array(     // 月ごとの練習回数と曜日を指定
             ['count'=>3, 'w'=>6],
             ['count'=>4, 'w'=>6],
-            ['count'=>3, 'w'=>6],
+            ['count'=>4, 'w'=>6],
             ['count'=>3, 'w'=>6],
             ['count'=>4, 'w'=>6],
             ['count'=>0, 'w'=>6],
