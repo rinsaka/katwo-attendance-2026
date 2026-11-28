@@ -57,7 +57,8 @@ class PlaceControllerTest extends TestCase
         $part_ids = DB::table('parts')->select('id')->orderBy('id')->get();
         $part_ids->prepend(0);  // 先頭に要素を追加（id と インデックスを同じにしたい）
 
-        $admin = Admin::where('login_id', 'taro')->first();
+        // $admin = Admin::where('login_id', 'taro')->first();
+        $admin = Admin::first();
         // dd($admin);
         //
         $response = $this->actingAs($admin, 'admin')
@@ -66,9 +67,8 @@ class PlaceControllerTest extends TestCase
                         ->assertSee('活動施設一覧')
                         ->assertSee('管理者');
         //
-        $url = sprintf("/admin/place/%d", $place_ids[6]->id);
         $response = $this->actingAs($admin, 'admin')
-                        ->get($url)
+                        ->get("/admin/place/" . $place_ids[6]->id)
                         ->assertSee('瀬楽スタジオ')
                         ->assertSee('活動施設の編集')
                         ->assertSee('デフォルト活動施設')
@@ -109,16 +109,14 @@ class PlaceControllerTest extends TestCase
                 'pid' => '99a',
                 'place' => "そんな施設は存在しない",
                 ]);
+        //
+        // $places = DB::table('places')->orderBy('id')->get();
+        // dd($places);
+        //
         // 編集
         $response = $this->actingAs($admin, 'admin')
                 ->json('PATCH', '/admin/place', [
-                'pid' => "8",
-                'place' => "新しい練習施設B更新",
-                ]);
-        // 編集
-        $response = $this->actingAs($admin, 'admin')
-                ->json('PATCH', '/admin/place', [
-                'pid' => "8",
+                'pid' => "7",
                 'place' => "新しい練習施設A更新デフォルト",
                 'default_place' => '1',
                 ]);
