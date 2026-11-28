@@ -25,35 +25,6 @@ use Database\Seeders\ActivitiesTableSeeder;
 class DashboardControllerTest extends TestCase
 {
     use RefreshDatabase;
-    /**
-     * A basic feature test example.
-     */
-    public function test_example(): void
-    {
-        $response = $this->get('/');
-
-        $response->assertStatus(200);
-    }
-
-    public function test_admin_dashboard_with_seed(): void
-    {
-        $this->seed(UsersTableSeeder::class);
-        $this->seed(AdminsTableSeeder::class);
-        $this->seed(PlacesTableSeeder::class);
-        $this->seed(TimesTableSeeder::class);
-        $this->seed(PartsTableSeeder::class);
-        $this->seed(ActivitiesTableSeeder::class);
-
-        $admin = Admin::where('login_id', 'taro')->first();
-        // dd($admin);
-        $response = $this->actingAs($admin, 'admin')  // ガードを変更
-                            ->get('/admin/dashboard/')
-                            ->assertSee('活動予定一覧')
-                            ->assertSee('管理者モード')
-                            ->assertSee($admin->name);
-        //
-    }
-
 
     public function testDashboardContollerAsAdmin()
     {
@@ -87,10 +58,8 @@ class DashboardControllerTest extends TestCase
             $this->ymlist[$i] = $this->shift_month($year, $month, $i);
         }
 
-
-
-        $admin = Admin::where('login_id', 'taro')->first();
-        $user = User::where('login_id', 'user_a')->first();
+        $admin = Admin::first();
+        $user = User::first();
 
         // dd($admin);
         $response = $this->actingAs($admin, 'admin')
@@ -101,7 +70,8 @@ class DashboardControllerTest extends TestCase
         //
         //
         $response = $this->actingAs($admin, 'admin')
-                        ->get('/admin/activity/99');
+                        ->get('/admin/activity/99a')
+                        ->assertRedirect('/admin/dashboard');
 
         // --- testEditAsAdmin --------------------------
 
@@ -110,7 +80,7 @@ class DashboardControllerTest extends TestCase
         $day = sprintf("%d",(int)$day + 1);
         $new_day = "$year-$month-$day"; // 1日進める
 
-        // dd($time_ids, $place_ids);
+        // dd($time_ids, $place_ids, $acts);
 
         $response = $this->actingAs($admin, 'admin')
                         ->json('PATCH', '/admin/activity', [

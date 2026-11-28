@@ -28,7 +28,7 @@ class DashboardController extends Controller
                 if ($activity->created_at == $activity->updated_at) {
                     $activity->new = true;
                 } else {
-                $activity->update = true;
+                    $activity->update = true;
                 }
             }
         }

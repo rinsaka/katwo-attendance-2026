@@ -27,7 +27,16 @@ class ActivitiesTableSeeder extends Seeder
         $acts = $this->mk_activities();
         $iter = 0;
         foreach ($acts as $act) {
-            if($iter == 6) {
+            if($iter == 2) { // 更新
+                DB::table('activities')->insert([
+                    'act_at' => $act,
+                    'place_id' => 2,
+                    'time_id' => 3,
+                    'meeting' => false,
+                    'created_at' => Carbon::create($prev_year, $prev_month, 20, 18, 0, 0),
+                    'updated_at' => Carbon::now()
+                ]);
+            } elseif ($iter == 6) {
                 DB::table('activities')->insert([
                     'act_at' => $act,
                     'place_id' => 2,
@@ -53,7 +62,7 @@ class ActivitiesTableSeeder extends Seeder
                     'note' => "演奏会",
                     'meeting' => false,
                     'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::create($prev_year, $prev_month, 20, 18, 0, 0)
+                    'updated_at' => Carbon::now()
                 ]);
             } else {
                 DB::table('activities')->insert([
